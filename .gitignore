@@ -4,3 +4,6 @@ log/*.log
 tmp/**
 node_modules/
 .sass-cache
+.*.sw[mnop]
+css/theme/*.css
+js/reveal.min.js
