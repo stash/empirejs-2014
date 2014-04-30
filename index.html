@@ -45,7 +45,7 @@
 
         <section>
           <h1>Preventing XSS and CSRF</h1>
-          <h2>- or -</h2>
+          <h2><em>- or -</em></h2>
           <h2>the Realtime Web of Trust</h2>
           <h3>Jeremy Stashewsky, goinstant.com</h3>
         </section>
@@ -83,7 +83,7 @@
           </section>
 
           <section data-transition="fade">
-            <h3 style="font-family: 'Comic Neue'">Prevention &gt; Reaction</h3>
+            <h3 style="font-family: 'Comic Neue'">Prevention &nbsp;&gt;Reaction</h3>
             <aside class="notes">
               Prevention, through following good practices, is often the best thing we can do as JavaScripters
             </aside>
@@ -95,6 +95,7 @@
           <p class="fragment roll-in">XSS (Cross Site Scripting)</p>
           <p class="fragment roll-in">CSRF (Cross Site Request Forgery)</p>
           <p class="fragment roll-in">Realtime Request Forgery</p>
+          <p class="fragment"><strong>And how to fix them.</strong></p>
         </section>
 
         <section>
@@ -196,8 +197,11 @@
 
           <section>
             <h2>No</h2>
-            <strong>There's more than just HTML context</strong>
-            <img class="fragment" src="secure-filters%20cheat%20sheet.png" alt="[secure filters cheat sheet]" />
+            <p>There's more to it than HTML templates!</p>
+          </section>
+
+          <section data-transition="fade">
+            <p>If possible, use a <strong>context-sensitive</strong> API.</p>
           </section>
 
           <section data-transition="fade">
@@ -206,7 +210,7 @@
             <pre><code class="language-javascript" contenteditable>
   jQuery('username').html(user.name)
             </code></pre>
-            <p>Safe: (<code>.text()</code>)</p>
+            <p>Safe:</p>
             <pre><code class="language-javascript" contenteditable>
   jQuery('username').text(user.name)
             </code></pre>
@@ -219,7 +223,7 @@
   var username = document.getElementById('username');
   username.innerHTML = user.name;
             </code></pre>
-            <p>Safe: <code>document.createTextNode()</code></p>
+            <p>Safe:</p>
             <pre><code class="language-javascript" contenteditable>
   var username = document.getElementById('username');
   username.appendChild(document.createTextNode(username));
@@ -233,13 +237,13 @@
           <section data-transition="fade">
             <h2>Angular.js</h2>
             <h3>Strict Contextual Escaping</h3>
-            <a href="https://docs.angularjs.org/api/ng/service/$sce">https://docs.angularjs.org/api/ng/service/$sce</a>
-            <p>Also has <code>resourceUrlWhitelist/Blacklist</code> for validating resource URLs (RegExp and Strings)</p>
+            <a href="https://docs.angularjs.org/api/ng/service/$sce">docs.angularjs.org/api/ng/service/$sce</a>
+            <p>The <code>{{ }}</code> operator and <code>ng-</code> attributes are context-aware!</p>
           </section>
 
           <section data-transition="fade">
             <h2>React &amp; JSX</h2>
-            <a href="https://facebook.github.io/react/docs/jsx-in-depth.html">https://facebook.github.io/react/docs/jsx-in-depth.html</a>
+            <a href="https://facebook.github.io/react/docs/jsx-in-depth.html">facebook.github.io/react/docs/jsx-in-depth.html</a>
             <p>DOM manipulation macros are available without JSX:</p>
             <pre><code class="language-javascript">
   var link = React.DOM.a({href: 'https://example.com/'}, 'React');
@@ -250,10 +254,6 @@
             </code></pre>
           </section>
 
-          <section>
-            <h2>Template Solutions</h2>
-          </section>
-
           <section data-transition="fade">
             <h2>Java: OWASP enterprise Security API</h2>
             <a href="https://www.owasp.org/index.php/Category:OWASP_Enterprise_Security_API">OWASP ESAPI</a>
@@ -262,7 +262,7 @@
 
           <section data-transition="fade">
             <h2>JavaScript: GoInstant secure-filters</h2>
-            <a href="https://www.npmjs.org/package/secure-filters">https://www.npmjs.org/package/secure-filters</a>
+            <a href="https://www.npmjs.org/package/secure-filters">www.npmjs.org/package/secure-filters</a>
             <p>Output filters, works in node.js and browsers, includes EJS support</p>
             <pre><code class="language-erb" contenteditable>
   &lt;script&gt;
@@ -375,7 +375,8 @@
           <section data-transition="fade">
             <q>"... then they clicked submit on a form ..."</q>
             <p>=</p>
-            <p>Actions that change <strong>application state</strong> should be <code>POST/PUT/PATCH/DELETE</code> (consistent with the REST Architectural Style)</p>
+            <p>Actions that change <strong>application state</strong> should be <code>POST/PUT/PATCH/DELETE</code></p>
+            <p><small>(consistent with the REST Architectural Style)</small></p>
           </section>
 
           <section data-transition="fade">
@@ -402,7 +403,7 @@
 
           <section data-transition="fade">
             <h3>Connect Anti-CSRF middleware</h3>
-            <q cite="http://www.senchalabs.org/connect/csrf.html">www.senchalabs.org/connect/csrf.html</q>
+            <a href="http://www.senchalabs.org/connect/csrf.html">www.senchalabs.org/connect/csrf.html</a>
             <pre class="fragment"><code class="language-javascript" contenteditable>
   app.use(connect.session());
   app.use(connect.csrf());
@@ -438,9 +439,10 @@
 
           <section data-transition="fade">
             <h3>Forced-use of <code>GET</code></h3>
-            <p>Remember the principal idea: verify that the Human intended to do this</p>
-            <p class="fragment">Idea: If it's a link to be clicked, convert the link to invoke a form-<code>POST</code> instead!</p>
-            <p class="fragment">If not, it may be possible to ask the user for confirmation some how.</p>
+            <p>Is there some other way to verify that the Human intended to do this?</p>
+            <p class="fragment"><strong>Idea:</strong> If it's a link to be clicked, convert the link to invoke a form-<code>POST</code> instead!</p>
+            <p class="fragment"><strong>Idea:</strong> If not, ask the user for confirmation.</p>
+            <p class="fragment"><strong>Idea:</strong> For <em>really</em> sensitive operations, re-prompting for a password is good, especially for long-lived sessions</p>
           </section>
 
           <section>
@@ -448,7 +450,8 @@
             <p>You too can prevent <strike>forest</strike> CSRF fires!</p>
             <ol>
               <li class="fragment roll-in">Verify the user <strong>indended</strong> to do this action.</li>
-              <li class="fragment roll-in">Be a good REST citizen: <code>GET</code> should not change application state</li>
+              <li class="fragment roll-in">Be a good REST citizen: <code>GET</code> should not change application state.</li>
+              <li class="fragment roll-in">Anti-CSRF tokens are a good way to do this.</li>
             </ol>
           </section>
 
