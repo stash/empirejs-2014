@@ -39,14 +39,14 @@
 	<body>
 
 		<div class="reveal">
+      <img class="sfLogo" src="salesforce-logo.png" alt="[Salesforce]">
+      <img class="goLogo" src="gi-logo.png" alt="[GoInstant]">
 
 			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
 
-        <section>
+        <section id="titleSlide">
           <h1>Preventing XSS and CSRF</h1>
-          <h2><em>- or -</em></h2>
-          <h2>the Realtime Web of Trust</h2>
           <h3>Jeremy Stashewsky, goinstant.com</h3>
         </section>
 
@@ -68,7 +68,7 @@
           </section>
 
           <section data-transition="fade">
-            <h3 style="font-family: 'Comic Neue'">Security &isin; Trust</h3>
+            <h3 class="handWritey">Security &isin; Trust</h3>
             <aside class="notes">
               Security, and web security, are part of how we establish and
               maintain that trust.
@@ -76,26 +76,26 @@
           </section>
 
           <section data-transition="fade">
-            <h3 style="font-family: 'Comic Neue'">Vulnerabilties &notin; Trust</h3>
+            <h3 class="handWritey">Vulnerabilties &notin; Trust</h3>
             <aside class="notes">
               Allowing vulnerabilities in our web apps erodes that trust, so we strive to PREVENT as many as possible.
             </aside>
           </section>
 
           <section data-transition="fade">
-            <h3 style="font-family: 'Comic Neue'">Prevention &nbsp;&gt;Reaction</h3>
+            <h3 class="handWritey">Prevention &nbsp;&gt;Reaction</h3>
             <aside class="notes">
               Prevention, through following good practices, is often the best thing we can do as JavaScripters
             </aside>
           </section>
-        </section>
 
-        <section>
-          <h3>This Talk is an Introduction To</h3>
-          <p class="fragment roll-in">XSS (Cross Site Scripting)</p>
-          <p class="fragment roll-in">CSRF (Cross Site Request Forgery)</p>
-          <p class="fragment roll-in">Realtime Request Forgery</p>
-          <p class="fragment"><strong>And how to fix them.</strong></p>
+          <section>
+            <h3>This Talk is an Introduction To</h3>
+            <p class="fragment roll-in">XSS (Cross Site Scripting)</p>
+            <p class="fragment roll-in">CSRF (Cross Site Request Forgery)</p>
+            <p class="fragment roll-in">Realtime Request Forgery</p>
+            <p class="fragment"><strong>And how to fix them.</strong></p>
+          </section>
         </section>
 
         <section>
@@ -109,7 +109,7 @@
           </section>
 
           <section data-transition="fade">
-            <p>User-controlled data can introduce arbitrary</p>
+            <p>User-controlled data can inject into your page arbitrary</p>
             <p class="fragment grow">HTML</p>
             <p>and/or</p>
             <p class="fragment grow">JavaScript</p>
@@ -126,25 +126,29 @@
           </section>
 
           <section data-transition="fade">
-          <p>What happens if I update my profile and change my name from</p>
-          <p style="font-family:'Comic Neue'">Jeremy</p>
+          <p>What happens if I someone updates my profile and changes my name from</p>
+          <p class="handWritey">Jeremy</p>
           <p>to</p>
-          <p style="font-family:'Comic Neue'">&lt;/h1&gt;&lt;script&gt;<span class="fragment highlight-red">window.location='https://evil.com'</span>&lt;/script&gt;</p>
+          <p class="handWritey">&lt;/h1&gt;&lt;script&gt;<span class="fragment highlight-red">window.location='https://evil.com'</span>&lt;/script&gt;</p>
           <p>?</p>
           </section>
 
           <section data-transition="fade">
-            <p><strong>Rendered:</strong></p>
             <pre><code class="language-html" contenteditable>
+  &lt;h1&gt;Hello &lt;%- user.name %&gt;, welcome to &lt;%- site.name %&gt;&lt;/h1&gt;
+            </code></pre>
+            <p>... is rendered as ...</p>
+            <pre class="fragment"><code class="language-html" contenteditable>
 
   &lt;h1&gt;Hello &lt;/h1&gt;
   &lt;script&gt;window.location='https://evil.com'&lt;/script&gt;,
   welcome to My Awesome Site
 
             </code></pre>
+            <p class="fragment"><small>(boom)</small></p>
           </section>
 
-          <section data-transition="fade">
+          <section>
             <h2>A Two-Part Approach to Fixing XSS</h2>
             <ol>
               <li class="fragment">Validate Input</li>
@@ -152,13 +156,18 @@
             </ol>
           </section>
 
-          <section>
-            <img src="secure-filters%20data%20flow.png" alt="[secure filters data flow]" />
+          <section data-transition="fade">
+            <p>As illustrated in <a href="https://github.com/goinstant/secure-filters">secure-filters</a></p>
+            <p><img src="secure-filters%20data%20flow.png" alt="[secure filters data flow]"></p>
+          </section>
+
+          <section data-transition="zoom">
+            <h1>Validation</h1>
           </section>
 
           <section data-transition="fade">
             <h3>Validation</h3>
-            <p class="fragment roll-in">Best case: Compare against an <strong>Allow List</strong> of known-good values</p>
+            <p>Best case: Compare against an <strong>Allow List</strong> of known-good values</p>
             <p class="fragment">e.g.</p>
             <pre class="fragment"><code class="language-javascript" contenteditable>
   var HANDEDNESS = ['Lefty','Righty','Ambidexterous','Other'];
@@ -167,9 +176,14 @@
             <p class="fragment roll-in">Human names don't fit into a convenient list :(</p>
           </section>
 
+          <section data-transition="zoom">
+            <h1>Sanitization</h1>
+          </section>
+
           <section data-transition="fade">
-            <h2>Sanitization</h2>
+            <h3>Sanitization</h3>
             <small>(a.k.a. filtering, normalizing, or escaping)</small>
+            <p class="fragment">Validation can't cover <em>everything</em>.</p>
             <p class="fragment">Prevent user-controlled data from <strong>breaking out</strong> of its context.</p>
             <p class="fragment">E.g. from <code>HTML</code> into <code>&lt;script&gt;</code></p>
           </section>
@@ -191,11 +205,11 @@
             <p class="fragment">Where <code>&lt;%= %&gt;</code> is an <strong>Escaping</strong> operator for a <strong>Template Slot</strong>.</p>
           </section>
 
-          <section data-transition="fade">
-            <blockquote>Is XSS Just for Templates?</blockquote>
+          <section>
+            <blockquote>Does XSS just affect templates?</blockquote>
           </section>
 
-          <section>
+          <section data-transition="zoom">
             <h2>No</h2>
             <p>There's more to it than HTML templates!</p>
           </section>
@@ -216,7 +230,7 @@
             </code></pre>
           </section>
 
-          <section data-transition="fade">
+          <section data-transition="linear">
             <h3>Plain JavaScript XSS</h3>
             <p>Vulnerable:</p>
             <pre><code class="language-javascript" contenteditable>
@@ -234,14 +248,18 @@
             <blockquote>Can any frameworks do this automatically?</blockquote>
           </section>
 
+          <section data-transition="zoom">
+            <h1>Yes!</h1>
+          </section>
+
           <section data-transition="fade">
             <h2>Angular.js</h2>
             <h3>Strict Contextual Escaping</h3>
             <a href="https://docs.angularjs.org/api/ng/service/$sce">docs.angularjs.org/api/ng/service/$sce</a>
-            <p>The <code>{{ }}</code> operator and <code>ng-</code> attributes are context-aware!</p>
+            <p class="fragment">The <code>{{ }}</code> operator and <code>ng-</code> attributes are context-aware!</p>
           </section>
 
-          <section data-transition="fade">
+          <section data-transition="linear">
             <h2>React &amp; JSX</h2>
             <a href="https://facebook.github.io/react/docs/jsx-in-depth.html">facebook.github.io/react/docs/jsx-in-depth.html</a>
             <p>DOM manipulation macros are available without JSX:</p>
@@ -254,13 +272,13 @@
             </code></pre>
           </section>
 
-          <section data-transition="fade">
+          <section data-transition="linear">
             <h2>Java: OWASP enterprise Security API</h2>
             <a href="https://www.owasp.org/index.php/Category:OWASP_Enterprise_Security_API">OWASP ESAPI</a>
             <p>Has APIs for escaping output, as well as input-validation helpers, anti-CSRF and more.</p>
           </section>
 
-          <section data-transition="fade">
+          <section data-transition="linear">
             <h2>JavaScript: GoInstant secure-filters</h2>
             <a href="https://www.npmjs.org/package/secure-filters">www.npmjs.org/package/secure-filters</a>
             <p>Output filters, works in node.js and browsers, includes EJS support</p>
@@ -273,9 +291,10 @@
   &lt;a href="javascript:activate('&lt;%-: userId |jsAttr%&gt;')"&gt;
     Click here to activate&lt;/a&gt;
             </code></pre>
+            <small>(disclaimer: I'm the primary author of secure-filters)</small>
           </section>
 
-          <section data-transition="fade">
+          <section data-transition="linear">
             <h2>PHP: Phalcon\Escaper</h2>
             <a href="http://docs.phalconphp.com/en/latest/reference/escaper.html">docs.phalconphp.com/en/latest/reference/escaper.html</a>
             <p>Good selection of output filters</p>
@@ -294,7 +313,7 @@
             </code></pre>
           </section>
 
-          <section data-transition="fade">
+          <section data-transition="linear">
             <h3>Go <code>html/template</code></h3>
             <a href="http://golang.org/pkg/html/template/">golang.org/pkg/html/template/</a>
             <p>Based on <a href="http://wiki.ecmascript.org/doku.php?id=harmony:quasis">EcmaScript Harmony "Quasis"</a> (a.k.a. Tagged Template Strings)</p>
@@ -310,8 +329,8 @@
           <section>
             <h3>See also:</h3>
             <ul>
-              <li><a href="https://github.com/w3c/webappsec"><code>Content-Security-Policy</code></a> HTTP header</li>
-              <li><a href="http://cspbuilder.info/">cspbuilder.info</a> is a neat tool to form a valid CSP header.
+              <li><a href="https://github.com/w3c/webappsec"><code>Content-Security-Policy</code></a> HTTP header as an additional layer of defense</li>
+              <li><a href="http://cspbuilder.info/">cspbuilder.info</a> is a neat tool to form a valid CSP header.</li>
             </ul>
           </section>
 
@@ -339,18 +358,19 @@
             <p>For example,</p>
             <ul>
               <li class="fragment">You're logged into <code>https://example.com</code></li>
-              <li class="fragment">You go to visit <code>http://evil.com</code></li>
+              <li class="fragment">You accidentally click a link to <code>http://evil.com</code></li>
             </ul>
           </section>
 
           <section data-transition="fade">
-            <p><code>evil.com</code> has the following markup:</p>
+            <p>Say <code>evil.com</code> has the following HTML:</p>
             <pre><code class="language-html" contenteditable>
   &lt;title&gt;Welcome to Evil.com&lt;/title&gt;
   &lt;script src="https://example.com/api/inviteAdmin?email=hacker@evil.com"&gt;
             </code></pre>
             <p class="fragment">Even though you're <em>visiting</em> <code>evil.com</code>,</p>
             <p class="fragment">you're <em>still authenticated</em> with <code>example.com</code>!</p>
+            <p class="fragment"><small>(boom)</small></p>
           </section>
 
           <section>
@@ -360,9 +380,10 @@
           <section data-transition="fade">
             <h3>In Human terms:</h3>
             <p class="fragment">Assert that the user <strong>intended</strong> to do this action.</p>
-            <p class="fragment">E.g. the user was on my website ...</p>
-            <p class="fragment">... then, they clicked submit on a form ...</p>
-            <p class="fragment">... therefore, this isn't a Cross-Site Forgery</p>
+            <p class="fragment">E.g.</p>
+            <p class="fragment handWritey">The user was on my website ...</p>
+            <p class="fragment handWritey">... then, they clicked submit on a form ...</p>
+            <p class="fragment handWritey">... therefore, this isn't a Cross-Site Forgery</p>
           </section>
 
           <section data-transition="fade">
@@ -413,7 +434,7 @@
   var token = req.csrfToken();
   res.render('template', { _csrf: token });
             </code></pre>
-            <p class="fragment">(Connect's CSRF middleware is also BREACH attack resistant)</p>
+            <p class="fragment">(Connect's CSRF middleware is also <a href="http://breachattack.com/">BREACH attack</a> resistant)</p>
           </section>
 
           <section data-transition="fade">
@@ -449,9 +470,9 @@
             <h2>CSRF summary</h2>
             <p>You too can prevent <strike>forest</strike> CSRF fires!</p>
             <ol>
-              <li class="fragment roll-in">Verify the user <strong>indended</strong> to do this action.</li>
-              <li class="fragment roll-in">Be a good REST citizen: <code>GET</code> should not change application state.</li>
-              <li class="fragment roll-in">Anti-CSRF tokens are a good way to do this.</li>
+              <li class="fragment roll-in"><strong>Verify intent</strong>: did the user indend to do this action?</li>
+              <li class="fragment roll-in"><strong>Be a good REST citizen</strong>: Use <code>POST</code>/<code>PUT</code>/etc. instead of <code>GET</code>.</li>
+              <li class="fragment roll-in"><strong>Use Anti-CSRF tokens</strong>: confirms presence, identity and intent.
             </ol>
           </section>
 

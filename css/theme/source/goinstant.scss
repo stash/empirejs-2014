@@ -40,13 +40,32 @@ $selectionBackgroundColor: #134674;
 }
 
 .goLogo {
+    height: 40px;
     position: fixed;
-    bottom: 0;
-    right: 0;
+    bottom: 18px;
+    left: 90px;
+    opacity: 0.5;
 }
 
+.sfLogo {
+    height: 60px;
+    position: fixed;
+    bottom: 4px;
+    left: 4px;
+    opacity: 0.5;
+}
+
+.handWritey {
+  font-family: 'Comic Neue', 'Comic Sans' !important;
+}
 
 // Theme template ------------------------------
 @import "../template/theme";
 // ---------------------------------------------
 
+.reveal aside.controls div {
+  opacity: 0.025 !important;
+}
+.reveal aside.controls div.enabled {
+  opacity: 0.1 !important;
+}
