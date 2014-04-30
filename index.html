@@ -144,24 +144,20 @@
           </section>
 
           <section data-transition="fade">
-            <h2>A Two-Phase Approach</h2>
-            <ul>
+            <h2>A Two-Part Approach to Fixing XSS</h2>
+            <ol>
               <li class="fragment">Validate Input</li>
               <li class="fragment">Sanitize Output</li>
-            </ul>
+            </ol>
           </section>
 
-          <section data-transition="fade">
-            <p>First mistake was allowing that name.</p>
-          </section>
-          <section data-transition="fade">
-            <p>Second mistake was using an <strong>Interpolation</strong> rather
-            than an <strong>Escape</strong> operator.</p>
+          <section>
+            <img src="secure-filters%20data%20flow.png" alt="[secure filters data flow]" />
           </section>
 
           <section data-transition="fade">
             <h3>Validation</h3>
-            <p class="fragment roll-in">Compare against an <strong>Allow List</strong></p>
+            <p class="fragment roll-in">Best case: Compare against an <strong>Allow List</strong> of known-good values</p>
             <p class="fragment">e.g.</p>
             <pre class="fragment"><code class="language-javascript" contenteditable>
   var HANDEDNESS = ['Lefty','Righty','Ambidexterous','Other'];
@@ -172,22 +168,36 @@
 
           <section data-transition="fade">
             <h2>Sanitization</h2>
-            <small>(a.k.a. filtering or escaping)</small>
+            <small>(a.k.a. filtering, normalizing, or escaping)</small>
             <p class="fragment">Prevent user-controlled data from <strong>breaking out</strong> of its context.</p>
             <p class="fragment">E.g. from <code>HTML</code> into <code>&lt;script&gt;</code></p>
           </section>
 
-          <section>
-            <h3>There's more than just HTML context</h3>
-            <img src="secure-filters cheat sheet.png" />
+          <section data-transition="fade">
+            <h3>Fixed example (EJS)</h3>
+            <p>Change ...</p>
+            <pre class="fragment"><code class="language-html" contenteditable>
+
+  &lt;h1&gt;Hello &lt;%- user.name %&gt;, welcome to &lt;%- site.name %&gt;&lt;/h1&gt;
+
+            </code></pre>
+            <p class="fragment">... to ...</p>
+            <pre class="fragment"><code class="language-html" contenteditable>
+
+  &lt;h1&gt;Hello &lt;%= user.name %&gt;, welcome to &lt;%- site.name %&gt;&lt;/h1&gt;
+
+            </code></pre>
+            <p class="fragment">Where <code>&lt;%= %&gt;</code> is an <strong>Escaping</strong> operator for a <strong>Template Slot</strong>.</p>
           </section>
 
           <section data-transition="fade">
             <blockquote>Is XSS Just for Templates?</blockquote>
           </section>
 
-          <section data-transition="fade">
-            <h1>No</h1>
+          <section>
+            <h2>No</h2>
+            <strong>There's more than just HTML context</strong>
+            <img class="fragment" src="secure-filters%20cheat%20sheet.png" alt="[secure filters cheat sheet]" />
           </section>
 
           <section data-transition="fade">
@@ -217,10 +227,236 @@
           </section>
 
           <section>
-            <h3>In Summary</h3>
-            <img src="secure-filters data flow.png" />
+            <blockquote>Can any frameworks do this automatically?</blockquote>
           </section>
 
+          <section data-transition="fade">
+            <h2>Angular.js</h2>
+            <h3>Strict Contextual Escaping</h3>
+            <a href="https://docs.angularjs.org/api/ng/service/$sce">https://docs.angularjs.org/api/ng/service/$sce</a>
+            <p>Also has <code>resourceUrlWhitelist/Blacklist</code> for validating resource URLs (RegExp and Strings)</p>
+          </section>
+
+          <section data-transition="fade">
+            <h2>React &amp; JSX</h2>
+            <a href="https://facebook.github.io/react/docs/jsx-in-depth.html">https://facebook.github.io/react/docs/jsx-in-depth.html</a>
+            <p>DOM manipulation macros are available without JSX:</p>
+            <pre><code class="language-javascript">
+  var link = React.DOM.a({href: 'https://example.com/'}, 'React');
+            </code></pre>
+            <p>Or, conveniently in JSX:</p>
+            <pre><code class="language-html">
+  var link = &lt;a href="https://example.com/"&gt;React&lt;/a&gt;;
+            </code></pre>
+          </section>
+
+          <section>
+            <h2>Template Solutions</h2>
+          </section>
+
+          <section data-transition="fade">
+            <h2>Java: OWASP enterprise Security API</h2>
+            <a href="https://www.owasp.org/index.php/Category:OWASP_Enterprise_Security_API">OWASP ESAPI</a>
+            <p>Has APIs for escaping output, as well as input-validation helpers, anti-CSRF and more.</p>
+          </section>
+
+          <section data-transition="fade">
+            <h2>JavaScript: GoInstant secure-filters</h2>
+            <a href="https://www.npmjs.org/package/secure-filters">https://www.npmjs.org/package/secure-filters</a>
+            <p>Output filters, works in node.js and browsers, includes EJS support</p>
+            <pre><code class="language-erb" contenteditable>
+  &lt;script&gt;
+    var config = &lt;%-: config |jsObj%&gt;;
+    var userId = parseInt('&lt;%-: userId |js%&gt;',10);
+  &lt;/script&gt;
+  &lt;a href="/welcome/&lt;%-: userId |uri%&gt;"&gt;Welcome &lt;%-: userName |html%&gt;&lt;/a&gt;
+  &lt;a href="javascript:activate('&lt;%-: userId |jsAttr%&gt;')"&gt;
+    Click here to activate&lt;/a&gt;
+            </code></pre>
+          </section>
+
+          <section data-transition="fade">
+            <h2>PHP: Phalcon\Escaper</h2>
+            <a href="http://docs.phalconphp.com/en/latest/reference/escaper.html">docs.phalconphp.com/en/latest/reference/escaper.html</a>
+            <p>Good selection of output filters</p>
+            <pre><code class="language-php" contenteditable>
+  &lt;title&gt;&lt;?php echo $e-&gt;escapeHtml($maliciousTitle) ?&gt;&lt;/title&gt;
+
+  &lt;style type="text/css"&gt;
+  .&lt;?php echo $e-&gt;escapeCss($className) ?&gt; {
+      font-family  : "&lt;?php echo $e-&gt;escapeCss($fontName) ?&gt;";
+  }
+  &lt;/style&gt;
+
+  &lt;div class='&lt;?php echo $e-&gt;escapeHtmlAttr($className) ?&gt;'&gt;hello&lt;/div&gt;
+
+  &lt;script&gt;var some = '&lt;?php echo $e-&gt;escapeJs($javascriptText) ?&gt;'&lt;/script&gt;
+            </code></pre>
+          </section>
+
+          <section data-transition="fade">
+            <h3>Go <code>html/template</code></h3>
+            <a href="http://golang.org/pkg/html/template/">golang.org/pkg/html/template/</a>
+            <p>Based on <a href="http://wiki.ecmascript.org/doku.php?id=harmony:quasis">EcmaScript Harmony "Quasis"</a> (a.k.a. Tagged Template Strings)</p>
+            <pre><code class="language-html" contenteditable>
+  &lt;a href="/search?q={{.}}"&gt;{{.}}&lt;/a&gt;
+            </code></pre>
+            <p>... is <em>compiled</em> to mean ...</p>
+            <pre><code class="language-html" contenteditable>
+  &lt;a href="/search?q={{. | urlquery}}"&gt;{{. | html}}&lt;/a&gt;
+            </code></pre>
+          </section>
+
+          <section>
+            <h3>See also:</h3>
+            <ul>
+              <li><a href="https://github.com/w3c/webappsec"><code>Content-Security-Policy</code></a> HTTP header</li>
+              <li><a href="http://cspbuilder.info/">cspbuilder.info</a> is a neat tool to form a valid CSP header.
+            </ul>
+          </section>
+
+          <section>
+            <h3>XSS In Summary</h3>
+            <ol>
+              <li><strong>Validate</strong> your inputs</li>
+              <li><strong>Sanitize</strong> your outputs</li>
+            </ol>
+          </section>
+
+        </section>
+
+        <section>
+          <section>
+            <h1>CSRF</h1>
+            <p>Cross-Site Request Forgery</p>
+          </section>
+
+          <section data-transition="fade">
+          <p>CSRF exploits the fact that you are <strong>logged-in</strong> to some <em>other</em> site.</p>
+          </section>
+
+          <section data-transition="fade">
+            <p>For example,</p>
+            <ul>
+              <li class="fragment">You're logged into <code>https://example.com</code></li>
+              <li class="fragment">You go to visit <code>http://evil.com</code></li>
+            </ul>
+          </section>
+
+          <section data-transition="fade">
+            <p><code>evil.com</code> has the following markup:</p>
+            <pre><code class="language-html" contenteditable>
+  &lt;title&gt;Welcome to Evil.com&lt;/title&gt;
+  &lt;script src="https://example.com/api/inviteAdmin?email=hacker@evil.com"&gt;
+            </code></pre>
+            <p class="fragment">Even though you're <em>visiting</em> <code>evil.com</code>,</p>
+            <p class="fragment">you're <em>still authenticated</em> with <code>example.com</code>!</p>
+          </section>
+
+          <section>
+            <h2>How do we fix this?</h2>
+          </section>
+
+          <section data-transition="fade">
+            <h3>In Human terms:</h3>
+            <p class="fragment">Assert that the user <strong>intended</strong> to do this action.</p>
+            <p class="fragment">E.g. the user was on my website ...</p>
+            <p class="fragment">... then, they clicked submit on a form ...</p>
+            <p class="fragment">... therefore, this isn't a Cross-Site Forgery</p>
+          </section>
+
+          <section data-transition="fade">
+            <h3>In Technical terms:</h3>
+            <q>"The user was on my website ..."</q>
+            <p>=</p>
+            <p>Provide the user a unique, <em>secret</em> Anti-CSRF token in addition to their login-cookie.</p>
+          </section>
+
+          <section data-transition="fade">
+            <q>"... then they clicked submit on a form ..."</q>
+            <p>=</p>
+            <p>Actions that change <strong>application state</strong> should be <code>POST/PUT/PATCH/DELETE</code> (consistent with the REST Architectural Style)</p>
+          </section>
+
+          <section data-transition="fade">
+            <q>"... therefore, this isn't a Cross-Site Forgery"</q>
+            <p>=</p>
+            <p>Validate the Anti-CSRF token, which <strong>MUST</strong> be kept secret from attackers</p>
+          </section>
+
+          <section>
+            <h2>Fixing example.com</h2>
+            <p>Assume it's running a simple Express 3.x node.js server with EJS templates.</p>
+          </section>
+
+          <section data-transition="fade">
+            <h3>Express Routes</h3>
+            <pre class="fragment"><code class="language-javascript" contenteditable>
+  app.get('/api/inviteAdmin', handlerFn);
+            </code></pre>
+            <p class="fragment">... change this to ...</p>
+            <pre class="fragment"><code class="language-javascript" contenteditable>
+  app.post('/api/inviteAdmin', handlerFn);
+            </code></pre>
+          </section>
+
+          <section data-transition="fade">
+            <h3>Connect Anti-CSRF middleware</h3>
+            <q cite="http://www.senchalabs.org/connect/csrf.html">www.senchalabs.org/connect/csrf.html</q>
+            <pre class="fragment"><code class="language-javascript" contenteditable>
+  app.use(connect.session());
+  app.use(connect.csrf());
+            </code></pre>
+            <p class="fragment">... then to access the token ...</p>
+            <pre class="fragment"><code class="language-javascript" contenteditable>
+  var token = req.csrfToken();
+  res.render('template', { _csrf: token });
+            </code></pre>
+            <p class="fragment">(Connect's CSRF middleware is also BREACH attack resistant)</p>
+          </section>
+
+          <section data-transition="fade">
+            <h3>Change the EJS template</h3>
+
+            <pre class="fragment"><code class="language-html" contenteditable>
+  &lt;form method="GET" action="/api/inviteAdmin"&gt;
+    &lt;input type="email" name="email"&gt;
+            </code></pre>
+
+            <p class="fragment">... change to use <code>POST</code> and consume anti-CSRF token ...</p>
+
+            <pre class="fragment"><code class="language-html" contenteditable>
+  &lt;form method="POST" action="/api/inviteAdmin"&gt;
+    &lt;input type="hidden" name="_csrf" value="&lt;%- _csrf %&gt;"&gt;
+    &lt;input type="email" name="email"&gt;
+            </code></pre>
+          </section>
+
+          <section>
+            <blockquote>What if I <em>have</em> to use a <code>GET</code>?</blockquote>
+          </section>
+
+          <section data-transition="fade">
+            <h3>Forced-use of <code>GET</code></h3>
+            <p>Remember the principal idea: verify that the Human intended to do this</p>
+            <p class="fragment">Idea: If it's a link to be clicked, convert the link to invoke a form-<code>POST</code> instead!</p>
+            <p class="fragment">If not, it may be possible to ask the user for confirmation some how.</p>
+          </section>
+
+          <section>
+            <h2>CSRF summary</h2>
+            <p>You too can prevent <strike>forest</strike> CSRF fires!</p>
+            <ol>
+              <li class="fragment roll-in">Verify the user <strong>indended</strong> to do this action.</li>
+              <li class="fragment roll-in">Be a good REST citizen: <code>GET</code> should not change application state</li>
+            </ol>
+          </section>
+
+        </section>
+
+        <section>
+          <h1>Realtime Attacks</h1>
+          <p>Websockets, XSS, and CSRF, oh my.</p>
         </section>
 
       </div>

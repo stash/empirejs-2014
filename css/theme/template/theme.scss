@@ -12,7 +12,7 @@ body {
 .reveal {
 	font-family: $mainFont;
 	font-size: $mainFontSize;
-	font-weight: normal;
+	font-weight: $mainFontWeight;
 	letter-spacing: -0.02em;
 	color: $mainColor;
 }
@@ -37,6 +37,7 @@ body {
 	color: $headingColor;
 
 	font-family: $headingFont;
+	font-weight: $headingFontWeight;
 	line-height: $headingLineHeight;
 	letter-spacing: $headingLetterSpacing;
 
