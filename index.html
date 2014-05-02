@@ -45,6 +45,12 @@
 			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
 
+      <!-- Cover CSP and how to use it -->
+      <!-- show how the HTML in the template gets escaped -->
+      <!-- show how the other escaping methods work -->
+      <!-- show how the different contexts work and how JSON-encoding doesn't prevent script injection -->
+      <!-- emphasise "prevent" not so much "fix" -->
+
         <section id="titleSlide">
           <h1>Preventing XSS and CSRF</h1>
           <h3>Jeremy Stashewsky, goinstant.com</h3>
@@ -83,9 +89,10 @@
           </section>
 
           <section data-transition="fade">
-            <h3 class="handWritey">Prevention &nbsp;&gt;Reaction</h3>
+            <h3 class="handWritey">Prevention &nbsp;&gt;Repair</h3>
             <aside class="notes">
-              Prevention, through following good practices, is often the best thing we can do as JavaScripters
+              Prevention, through following good practices, is often the best
+              thing we can do as JavaScripters
             </aside>
           </section>
 
@@ -93,8 +100,7 @@
             <h3>This Talk is an Introduction To</h3>
             <p class="fragment roll-in">XSS (Cross Site Scripting)</p>
             <p class="fragment roll-in">CSRF (Cross Site Request Forgery)</p>
-            <p class="fragment roll-in">Realtime Request Forgery</p>
-            <p class="fragment"><strong>And how to fix them.</strong></p>
+            <p class="fragment"><strong>And how to prevent (or fix) them.</strong></p>
           </section>
         </section>
 
@@ -105,14 +111,16 @@
           </section>
 
           <section data-transition="fade">
-            <p>XSS is an injection attack</p>
+            <p>XSS is an injection attack, driven by user-controlled inputs</p>
+            <p><img class="fragment" src="anti-xss%20data%20flow%20bad.png" alt="[bad data flow]" style="border:0"></p>
           </section>
 
           <section data-transition="fade">
-            <p>User-controlled data can inject into your page arbitrary</p>
+            <p>Potentially, a user can place arbitrary</p>
             <p class="fragment grow">HTML</p>
             <p>and/or</p>
             <p class="fragment grow">JavaScript</p>
+            <p>on to your page!</p>
           </section>
 
           <section data-transition="fade">
@@ -126,7 +134,7 @@
           </section>
 
           <section data-transition="fade">
-          <p>What happens if I someone updates my profile and changes my name from</p>
+          <p>What happens if someone updates my profile and changes my name from</p>
           <p class="handWritey">Jeremy</p>
           <p>to</p>
           <p class="handWritey">&lt;/h1&gt;&lt;script&gt;<span class="fragment highlight-red">window.location='https://evil.com'</span>&lt;/script&gt;</p>
@@ -149,16 +157,16 @@
           </section>
 
           <section>
-            <h2>A Two-Part Approach to Fixing XSS</h2>
+            <h2>A Three-Part Approach to Fixing XSS</h2>
             <ol>
               <li class="fragment">Validate Input</li>
               <li class="fragment">Sanitize Output</li>
+              <li class="fragment">Enable Content-Security-Policy</li>
             </ol>
           </section>
 
           <section data-transition="fade">
-            <p>As illustrated in <a href="https://github.com/goinstant/secure-filters">secure-filters</a></p>
-            <p><img src="secure-filters%20data%20flow.png" alt="[secure filters data flow]"></p>
+            <p><img src="anti-xss%20data%20flow%20good.png" alt="[anti-xss data flow]" style="border:0"></p>
           </section>
 
           <section data-transition="zoom">
@@ -166,7 +174,7 @@
           </section>
 
           <section data-transition="fade">
-            <h3>Validation</h3>
+            <h3>Step 1: Validation</h3>
             <p>Best case: Compare against an <strong>Allow List</strong> of known-good values</p>
             <p class="fragment">e.g.</p>
             <pre class="fragment"><code class="language-javascript" contenteditable>
@@ -181,7 +189,7 @@
           </section>
 
           <section data-transition="fade">
-            <h3>Sanitization</h3>
+            <h3>Step 2: Sanitization</h3>
             <small>(a.k.a. filtering, normalizing, or escaping)</small>
             <p class="fragment">Validation can't cover <em>everything</em>.</p>
             <p class="fragment">Prevent user-controlled data from <strong>breaking out</strong> of its context.</p>
@@ -205,47 +213,76 @@
             <p class="fragment">Where <code>&lt;%= %&gt;</code> is an <strong>Escaping</strong> operator for a <strong>Template Slot</strong>.</p>
           </section>
 
+          <section data-transition="fade">
+            <p>This changes the bad output from...</p>
+            <pre class="fragment"><code class="language-html" contenteditable>
+
+  &lt;h1&gt;Hello &lt;/h1&gt;
+  &lt;script&gt;window.location='https://evil.com'&lt;/script&gt;,
+  welcome to My Awesome Site
+
+            </code></pre>
+            <p class="fragment">... to the safe ...</p>
+            <pre class="fragment"><code class="language-html" contenteditable>
+
+  &lt;h1&gt;Hello &amp;lt;/h1&amp;gt;
+  &amp;lt;script&amp;gt;window.location='https://evil.com'&amp;lt;/script&amp;gt;,
+  welcome to My Awesome Site
+
+            </code></pre>
+          </section>
+
           <section>
-            <blockquote>Does XSS just affect templates?</blockquote>
+            <blockquote>Do I just have to worry about escaping HTML?</blockquote>
           </section>
 
           <section data-transition="zoom">
             <h2>No</h2>
-            <p>There's more to it than HTML templates!</p>
+            <p>There's more to it than HTML entity-encoding!</p>
           </section>
 
           <section data-transition="fade">
-            <p>If possible, use a <strong>context-sensitive</strong> API.</p>
+            <h3>JavaScript Variable Attack</h3>
+            <p>Todo: show how HTML-escaping and JSON-encoding is insufficient</p>
           </section>
 
           <section data-transition="fade">
-            <h3>jQuery XSS</h3>
-            <p>Vulnerable:</p>
-            <pre><code class="language-javascript" contenteditable>
-  jQuery('username').html(user.name)
-            </code></pre>
-            <p>Safe:</p>
-            <pre><code class="language-javascript" contenteditable>
-  jQuery('username').text(user.name)
-            </code></pre>
+            <h3>Query Param Attack</h3>
+            <p>Todo: show how HTML-escaping is insufficient for <code>?name={slot}</code></p>
           </section>
 
-          <section data-transition="linear">
-            <h3>Plain JavaScript XSS</h3>
-            <p>Vulnerable:</p>
-            <pre><code class="language-javascript" contenteditable>
-  var username = document.getElementById('username');
-  username.innerHTML = user.name;
-            </code></pre>
-            <p>Safe:</p>
-            <pre><code class="language-javascript" contenteditable>
-  var username = document.getElementById('username');
-  username.appendChild(document.createTextNode(username));
-            </code></pre>
+          <section data-transition="fade">
+            <p>If possible, use a <strong>context-sensitive</strong> method for escaping.</p>
           </section>
+
+          <!-- <section data-transition="fade"> -->
+          <!--   <h3>jQuery XSS</h3> -->
+          <!--   <p>Vulnerable:</p> -->
+          <!--   <pre><code class="language-javascript" contenteditable> -->
+  <!-- jQuery('username').html(user.name) -->
+          <!--   </code></pre> -->
+          <!--   <p>Safe:</p> -->
+          <!--   <pre><code class="language-javascript" contenteditable> -->
+  <!-- jQuery('username').text(user.name) -->
+          <!--   </code></pre> -->
+          <!-- </section> -->
+
+          <!-- <section data-transition="linear"> -->
+          <!--   <h3>Plain JavaScript XSS</h3> -->
+          <!--   <p>Vulnerable:</p> -->
+          <!--   <pre><code class="language-javascript" contenteditable> -->
+  <!-- var username = document.getElementById('username'); -->
+  <!-- username.innerHTML = user.name; -->
+          <!--   </code></pre> -->
+          <!--   <p>Safe:</p> -->
+          <!--   <pre><code class="language-javascript" contenteditable> -->
+  <!-- var username = document.getElementById('username'); -->
+  <!-- username.appendChild(document.createTextNode(username)); -->
+          <!--   </code></pre> -->
+          <!-- </section> -->
 
           <section>
-            <blockquote>Can any frameworks do this automatically?</blockquote>
+            <blockquote>Are there any tools to help me?</blockquote>
           </section>
 
           <section data-transition="zoom">
@@ -327,18 +364,38 @@
           </section>
 
           <section>
-            <h3>See also:</h3>
-            <ul>
-              <li><a href="https://github.com/w3c/webappsec"><code>Content-Security-Policy</code></a> HTTP header as an additional layer of defense</li>
-              <li><a href="http://cspbuilder.info/">cspbuilder.info</a> is a neat tool to form a valid CSP header.</li>
-            </ul>
+            <h1>Content-Security-Policy</h1>
+            <p>Latest: <a href="https://github.com/w3c/webappsec">github.com/w3c/webappsec</a></p>
+          </section>
+
+          <section data-transition="fade">
+            <h3>Content-Security-Policy</h3>
+            <p>TODO: what it is</p>
+            <p>TODO: how it works</p>
+          </section>
+
+          <section data-transition="fade">
+            <p>TODO: show how it would have saved us from that injection attack example</p>
+          </section>
+
+          <section data-transition="fade">
+            <blockquote>Are there any tools to help me with CSP?</blockquote>
+          </section>
+
+          <section data-transition="linear">
+            <h3><code>require('helmet')</code></h3>
+          </section>
+
+          <section data-transition="linear">
+             <a href="http://cspbuilder.info/">cspbuilder.info</a> is a neat tool to form a valid CSP header.
           </section>
 
           <section>
-            <h3>XSS In Summary</h3>
+            <h3>XSS Prevention In Summary</h3>
             <ol>
               <li><strong>Validate</strong> your inputs</li>
               <li><strong>Sanitize</strong> your outputs</li>
+              <li><strong>Enable CSP</strong> on your web-server</li>
             </ol>
           </section>
 
@@ -396,8 +453,9 @@
           <section data-transition="fade">
             <q>"... then they clicked submit on a form ..."</q>
             <p>=</p>
-            <p>Actions that change <strong>application state</strong> should be <code>POST/PUT/PATCH/DELETE</code></p>
-            <p><small>(consistent with the REST Architectural Style)</small></p>
+            <p class="fragment">Actions that change <strong>application state</strong> should be <code>POST/PUT/PATCH/DELETE</code></p>
+            <p class="fragment"><small>(consistent with the REST Architectural Style)</small></p>
+            <p class="fragment"><strong>Note:</strong> that <code>POST/etc.</code> on its own is <em>not enough</em> to stop CSRF!</p>
           </section>
 
           <section data-transition="fade">
@@ -459,28 +517,49 @@
           </section>
 
           <section data-transition="fade">
-            <h3>Forced-use of <code>GET</code></h3>
+            <h3>Forced-use of <code>GET</code> (1/2)</h3>
             <p>Is there some other way to verify that the Human intended to do this?</p>
             <p class="fragment"><strong>Idea:</strong> If it's a link to be clicked, convert the link to invoke a form-<code>POST</code> instead!</p>
             <p class="fragment"><strong>Idea:</strong> If not, ask the user for confirmation.</p>
             <p class="fragment"><strong>Idea:</strong> For <em>really</em> sensitive operations, re-prompting for a password is good, especially for long-lived sessions</p>
           </section>
 
+          <section data-transition="fade">
+            <h3>Forced-use of <code>GET</code> (2/2)</h3>
+            <p class="fragment"><strong>Idea:</strong> Include the <code>_csrf</code> value as a query param on the link.</p>
+            <p class="fragment">Works, but <code>app.use(connect.csrf())</code> doesn't check <code>GET</code> requests</p>
+          </section>
+
           <section>
             <h2>CSRF summary</h2>
             <p>You too can prevent <strike>forest</strike> CSRF fires!</p>
             <ol>
-              <li class="fragment roll-in"><strong>Verify intent</strong>: did the user indend to do this action?</li>
+              <li class="fragment roll-in"><strong>Verify intent</strong>: did the user do this action?</li>
               <li class="fragment roll-in"><strong>Be a good REST citizen</strong>: Use <code>POST</code>/<code>PUT</code>/etc. instead of <code>GET</code>.</li>
-              <li class="fragment roll-in"><strong>Use Anti-CSRF tokens</strong>: confirms presence, identity and intent.
+              <li class="fragment roll-in"><strong>Use Anti-CSRF tokens</strong>: confirms presence, identity and intent.</li>
             </ol>
           </section>
 
         </section>
 
         <section>
-          <h1>Realtime Attacks</h1>
-          <p>Websockets, XSS, and CSRF, oh my.</p>
+          <section>
+            <h1>In Conclusion</h1>
+          </section>
+
+          <section>
+            <h1>Trust</h1>
+          </section>
+
+          <section>
+            <h3>Thanks</h3>
+            <ul>
+              <li>Now that you know me a little, please feel free to call me "stash".</li>
+              <li>Talk is at <a href="https://github.com/stash">"stash/empirejs-2014" on github</a></li>
+              <li>I'm <a href="https://twitter.com/jstash">"@jstash" on twitter</a></li>
+              <li>Thanks to my employer <a href="https://goinstant.com/">GoInstant</a> for sponsoring this talk.  We make Real-time, Backend-as-a-Service web APIs, and are very serious about Security.</li>
+            </ul>
+          </section>
         </section>
 
       </div>
