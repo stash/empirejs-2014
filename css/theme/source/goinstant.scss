@@ -69,3 +69,21 @@ $selectionBackgroundColor: #134674;
 .reveal aside.controls div.enabled {
   opacity: 0.1 !important;
 }
+
+
+.reveal table {
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid black;
+  border-spacing: 0;
+  border-collapse: collapse;
+  padding: 0;
+}
+
+.reveal table td,
+.reveal table th {
+  border: 1px solid black;
+  margin: 0;
+  padding: 8px;
+  text-align: center;
+}

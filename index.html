@@ -45,12 +45,6 @@
 			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
 
-      <!-- Cover CSP and how to use it -->
-      <!-- show how the HTML in the template gets escaped -->
-      <!-- show how the other escaping methods work -->
-      <!-- show how the different contexts work and how JSON-encoding doesn't prevent script injection -->
-      <!-- emphasise "prevent" not so much "fix" -->
-
         <section id="titleSlide">
           <h1>Preventing XSS and CSRF</h1>
           <h3>Jeremy Stashewsky, goinstant.com</h3>
@@ -135,9 +129,9 @@
 
           <section data-transition="fade">
           <p>What happens if someone updates my profile and changes my name from</p>
-          <p class="handWritey">Jeremy</p>
+          <p class="handWritey">&ldquo;Jeremy&rdquo;</p>
           <p>to</p>
-          <p class="handWritey">&lt;/h1&gt;&lt;script&gt;<span class="fragment highlight-red">window.location='https://evil.com'</span>&lt;/script&gt;</p>
+          <p class="handWritey">&ldquo;&lt;/h1&gt;&lt;script&gt;<span class="fragment highlight-red">window.location='https://evil.com'</span>&lt;/script&gt;&rdquo;</p>
           <p>?</p>
           </section>
 
@@ -150,14 +144,14 @@
 
   &lt;h1&gt;Hello &lt;/h1&gt;
   &lt;script&gt;window.location='https://evil.com'&lt;/script&gt;,
-  welcome to My Awesome Site
+  welcome to My Awesome Site&lt;/h1&gt;
 
             </code></pre>
             <p class="fragment"><small>(boom)</small></p>
           </section>
 
           <section>
-            <h2>A Three-Part Approach to Fixing XSS</h2>
+            <h2>A Three-Part Approach to Preventing XSS</h2>
             <ol>
               <li class="fragment">Validate Input</li>
               <li class="fragment">Sanitize Output</li>
@@ -192,8 +186,35 @@
             <h3>Step 2: Sanitization</h3>
             <small>(a.k.a. filtering, normalizing, or escaping)</small>
             <p class="fragment">Validation can't cover <em>everything</em>.</p>
-            <p class="fragment">Prevent user-controlled data from <strong>breaking out</strong> of its context.</p>
-            <p class="fragment">E.g. from <code>HTML</code> into <code>&lt;script&gt;</code></p>
+            <p class="fragment">Prevents user-controlled data from <strong>breaking out</strong> of its context.</p>
+          </section>
+
+          <section data-transition="fade">
+            <p>HTML Entity-encoding takes <em>markup</em> characters and turns them into <em>display</em> characters.</p>
+          </section>
+
+          <section data-transition="fade">
+            <h4>Minimal list of HTML Entity Encodings</h4>
+            <table style="border: 1px solid black">
+              <thead>
+                <tr><th>Character</th><th>Encoding</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>&lt;</td><td><code>&amp;lt;</code></td></tr>
+                <tr><td>&gt;</td><td><code>&amp;gt;</code></td></tr>
+                <tr><td>&#39;</td><td><code>&amp;#39;</code></td></tr>
+                <tr><td>&#34;</td><td><code>&amp;quot;</code> or <code>&amp;#34;</code></td></tr>
+                <tr><td>&#38;</td><td><code>&amp;amp;</code> or <code>&amp;#38;</code></td></tr>
+              </tbody>
+            </table>
+          </section>
+
+          <section data-transition="fade">
+            <h4>Exhaustive List of HTML Entity Encodings</h4>
+            <p><small>(Insert all 65536 JavaScript UTF-16 code-points here)</small></p><!-- not TODO; making a point -->
+            <p>Basically, entity-encode characters <strong>not</strong> in this RegExp set:</p>
+            <p><code>[\t\n\v\f\r ,\.0-9A-Z_a-z\-\u00A0-\uFFFF]</code></p>
+            <p><small>source: <a href="https://github.com/goinstant/secure-filters/blob/d21f04190a63f1cc55078e4eb96adafe864c79cf/lib/secure-filters.js#L67">secure-filters</a></small></p>
           </section>
 
           <section data-transition="fade">
@@ -219,15 +240,15 @@
 
   &lt;h1&gt;Hello &lt;/h1&gt;
   &lt;script&gt;window.location='https://evil.com'&lt;/script&gt;,
-  welcome to My Awesome Site
+  welcome to My Awesome Site&lt;/h1&gt;
 
             </code></pre>
-            <p class="fragment">... to the safe ...</p>
+            <p class="fragment">... to the safe (entity-encoded) ...</p>
             <pre class="fragment"><code class="language-html" contenteditable>
 
   &lt;h1&gt;Hello &amp;lt;/h1&amp;gt;
   &amp;lt;script&amp;gt;window.location='https://evil.com'&amp;lt;/script&amp;gt;,
-  welcome to My Awesome Site
+  welcome to My Awesome Site&lt;/h1&gt;
 
             </code></pre>
           </section>
@@ -243,46 +264,83 @@
 
           <section data-transition="fade">
             <h3>JavaScript Variable Attack</h3>
-            <p>Todo: show how HTML-escaping and JSON-encoding is insufficient</p>
+            <pre><code class="language-javascript" contenteditable>
+  &lt;script&gt;
+    var foo = &lt;%- someJSON %&gt;;
+  &lt;/script&gt;
+            </code></pre>
+            <p class="fragment">+</p>
+            <pre class="fragment"><code class="language-javascript" contenteditable>
+  { someJSON: JSON.stringify("&lt;/script&gt;&lt;script&gt;alert('pwn');") }
+            </code></pre>
+            <p class="fragment">=</p>
+            <pre class="fragment"><code class="language-xml" contenteditable>
+  &lt;script&gt;
+    var foo = "&lt;/script&gt;&lt;script&gt;alert('pwn');";
+  &lt;/script&gt;
+            </code></pre>
+          </section>
+
+          <section data-transition="fade">
+            <h3>What the How?!</h3>
+            <p><code>&lt;script&gt;</code> is parsed <em>before</em> the JavaScript <code>&quot;</code>!</p>
+          </section>
+
+          <section data-transition="fade">
+            <h3>There's more!</h3>
+            <p>Let's say we JavaScript-string-literal escape</p>
+            <p><code>"&lt;"</code> becomes <code>"\x3C"</code>, etc.</p>
+            <pre class="fragment"><code class="language-xml" contenteditable>
+  &lt;script&gt;
+    var userName = "Jeremy\x3Cscript\x3Ealert('(boom)')\x3C/script\x3E";
+    element.innerHTML = "&lt;span&gt;"+userName+"&lt;/span&gt;";
+  &lt;/script&gt;
+            </code></pre>
+            <p class="fragment"><small>(boom)</small></p>
           </section>
 
           <section data-transition="fade">
             <h3>Query Param Attack</h3>
-            <p>Todo: show how HTML-escaping is insufficient for <code>?name={slot}</code></p>
+            <pre><code class="language-xml" contenteditable>
+  &lt;a href="/show?user=&lt;%= userId %&gt;"&gt;...&lt;/a&gt;;
+            </code></pre>
+            <p class="fragment">+</p>
+            <pre class="fragment"><code class="language-javascript" contenteditable>
+  { userId: "42&amp;user=666" }
+            </code></pre>
+            <p class="fragment">=</p>
+            <pre class="fragment"><code class="language-xml" contenteditable>
+  &lt;a href="/show?user=42&amp;amp;user=666"&gt;...&lt;/a&gt;;
+            </code></pre>
+            <p class="fragment"><code>https://example.com/show?user=42&user=666</code> maybe shows user 666 now?</p>
           </section>
 
           <section data-transition="fade">
-            <p>If possible, use a <strong>context-sensitive</strong> method for escaping.</p>
+            <h3>URI-escaping</h3>
+            <p>Convert unsafe characters to <code>%XX</code> UTF-8 octets.</p>
+            <p>E.g. <code>&amp;</code> to <code>%26</code></p>
+            <pre class="fragment"><code class="language-xml" contenteditable>
+  &lt;a href="/show?user=42%26user=666"&gt;...&lt;/a&gt;;
+            </code></pre>
+            <p class="fragment">Luckily, <code>parseInt("42&amp;user=666")</code> evaluates to <code>42</code>.</p>
           </section>
 
-          <!-- <section data-transition="fade"> -->
-          <!--   <h3>jQuery XSS</h3> -->
-          <!--   <p>Vulnerable:</p> -->
-          <!--   <pre><code class="language-javascript" contenteditable> -->
-  <!-- jQuery('username').html(user.name) -->
-          <!--   </code></pre> -->
-          <!--   <p>Safe:</p> -->
-          <!--   <pre><code class="language-javascript" contenteditable> -->
-  <!-- jQuery('username').text(user.name) -->
-          <!--   </code></pre> -->
-          <!-- </section> -->
+          <section data-transition="fade">
+            <h3>Other contexts</h3>
+            <ul>
+              <li class="fragment">CSS variables (can run JavaScript via <code>expression()</code>!)</li>
+              <li class="fragment">JavaScript-in-HTML-attributes</li>
+              <li class="fragment">SVG</li>
+              <li class="fragment">... and surely more that I haven't thought of yet</li>
+            </ul>
+          </section>
 
-          <!-- <section data-transition="linear"> -->
-          <!--   <h3>Plain JavaScript XSS</h3> -->
-          <!--   <p>Vulnerable:</p> -->
-          <!--   <pre><code class="language-javascript" contenteditable> -->
-  <!-- var username = document.getElementById('username'); -->
-  <!-- username.innerHTML = user.name; -->
-          <!--   </code></pre> -->
-          <!--   <p>Safe:</p> -->
-          <!--   <pre><code class="language-javascript" contenteditable> -->
-  <!-- var username = document.getElementById('username'); -->
-  <!-- username.appendChild(document.createTextNode(username)); -->
-          <!--   </code></pre> -->
-          <!-- </section> -->
+          <section data-transition="fade">
+            <p>Escaping has to be <strong>context-sensitive</strong></p>
+          </section>
 
           <section>
-            <blockquote>Are there any tools to help me?</blockquote>
+            <blockquote>Are there any tools to help me with Sanitization?</blockquote>
           </section>
 
           <section data-transition="zoom">
@@ -293,7 +351,7 @@
             <h2>Angular.js</h2>
             <h3>Strict Contextual Escaping</h3>
             <a href="https://docs.angularjs.org/api/ng/service/$sce">docs.angularjs.org/api/ng/service/$sce</a>
-            <p class="fragment">The <code>{{ }}</code> operator and <code>ng-</code> attributes are context-aware!</p>
+            <p>The <code>{{ }}</code> operator and <code>ng-</code> attributes are context-aware!</p>
           </section>
 
           <section data-transition="linear">
@@ -304,7 +362,7 @@
   var link = React.DOM.a({href: 'https://example.com/'}, 'React');
             </code></pre>
             <p>Or, conveniently in JSX:</p>
-            <pre><code class="language-html">
+            <pre><code class="language-xml">
   var link = &lt;a href="https://example.com/"&gt;React&lt;/a&gt;;
             </code></pre>
           </section>
@@ -318,8 +376,8 @@
           <section data-transition="linear">
             <h2>JavaScript: GoInstant secure-filters</h2>
             <a href="https://www.npmjs.org/package/secure-filters">www.npmjs.org/package/secure-filters</a>
-            <p>Output filters, works in node.js and browsers, includes EJS support</p>
-            <pre><code class="language-erb" contenteditable>
+            <p>Works in node.js and browsers, includes EJS support</p>
+            <pre><code class="language-xml" contenteditable>
   &lt;script&gt;
     var config = &lt;%-: config |jsObj%&gt;;
     var userId = parseInt('&lt;%-: userId |js%&gt;',10);
@@ -369,16 +427,42 @@
           </section>
 
           <section data-transition="fade">
-            <h3>Content-Security-Policy</h3>
-            <p>TODO: what it is</p>
-            <p>TODO: how it works</p>
+            <h3>Step 3: Content-Security-Policy</h3>
+            <p class="fragment">Validation can't cover <em>everything</em>...</p>
+            <p class="fragment">... and Sanitization can't catch <em>all</em> the cases...</p>
+            <p class="fragment"><small>(but you should still do them!)</small></p>
+            <p class="fragment">... we needed something more!</p>
           </section>
 
           <section data-transition="fade">
-            <p>TODO: show how it would have saved us from that injection attack example</p>
+            <h3>CSP</h3>
+            <p class="fragment">Pages define an Allow-List of what features (and their Origins) are permissible.</p>
           </section>
 
           <section data-transition="fade">
+            <h3>How to CSP</h3>
+            <p class="fragment">Pages define an Allow-List of what features (and their Origins) are permissible.</p>
+            <p class="fragment">Serve as a HTTP header (or use a <code>&lt;meta&gt;</code> HTML tag)</p>
+            <pre class="fragment"><code class="language-http" contenteditable>
+    Content-Security-Policy: default-src: 'none';
+      connect-src: ws-and-xhr.example.com;
+      font-src: https://fonts.googleapis.com;
+      frame-src: 'none';
+      media-src: youtube.com, ytimg.com;
+      script-src: https://example-cdn.com, https://cloudflare.com;
+      style-src: https://example-cdn.com;
+            </code></pre>
+          </section>
+
+          <section data-transition="fade">
+            <p>TODO: restate original injection attack example</p>
+          </section>
+
+          <section data-transition="fade">
+            <p>TODO: show how CSP would have saved us from that injection attack example</p>
+          </section>
+
+          <section>
             <blockquote>Are there any tools to help me with CSP?</blockquote>
           </section>
 
@@ -387,7 +471,9 @@
           </section>
 
           <section data-transition="linear">
-             <a href="http://cspbuilder.info/">cspbuilder.info</a> is a neat tool to form a valid CSP header.
+             <h3><a href="http://cspbuilder.info/">cspbuilder.info</a></h3>
+             <p>Neat tool using Report-Only mode to dynamically help you form a valid CSP header.</p>
+             <p><small>Just be aware it does send a list of all included scripts/fonts/etc to do that analysis</small></p>
           </section>
 
           <section>
