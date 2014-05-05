@@ -70,7 +70,6 @@ $selectionBackgroundColor: #134674;
   opacity: 0.1 !important;
 }
 
-
 .reveal table {
   margin-left: auto;
   margin-right: auto;
@@ -86,4 +85,16 @@ $selectionBackgroundColor: #134674;
   margin: 0;
   padding: 8px;
   text-align: center;
+}
+
+.reveal code {
+  font-family: 'Inconsolata', 'Consolas', 'Courier New', 'Courier', monospace;
+  background: #ccc;
+  border-radius: 4px;
+  padding-left: 0.25em;
+  padding-right: 0.25em;
+}
+
+.reveal pre code {
+  background: #333;
 }

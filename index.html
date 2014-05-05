@@ -4,10 +4,10 @@
 	<head>
 		<meta charset="utf-8">
 
-		<title>reveal.js - The HTML Presentation Framework</title>
+		<title>Preventing XSS and CSRF</title>
 
-		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
-		<meta name="author" content="Hakim El Hattab">
+		<meta name="description" content="Preventing XSS and CSRF, for javascript and node.js developers">
+		<meta name="author" content="Jeremy Stashewsky">
 
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -91,7 +91,7 @@
           </section>
 
           <section>
-            <h3>This Talk is an Introduction To</h3>
+            <h3>This talk is an introduction to</h3>
             <p class="fragment roll-in">XSS (Cross Site Scripting)</p>
             <p class="fragment roll-in">CSRF (Cross Site Request Forgery)</p>
             <p class="fragment"><strong>And how to prevent (or fix) them.</strong></p>
@@ -107,6 +107,11 @@
           <section data-transition="fade">
             <p>XSS is an injection attack, driven by user-controlled inputs</p>
             <p><img class="fragment" src="anti-xss%20data%20flow%20bad.png" alt="[bad data flow]" style="border:0"></p>
+
+            <aside class="notes">
+              The adage "Garbage in, Garbage out" doesn't map so well to
+              securing web-apps :(
+            </aside>
           </section>
 
           <section data-transition="fade">
@@ -118,21 +123,26 @@
           </section>
 
           <section data-transition="fade">
-            <p><strong>An Example</strong></p>
+            <p><strong>An example</strong></p>
             <pre><code class="language-html" contenteditable>
 
   &lt;h1&gt;Hello &lt;%- user.name %&gt;, welcome to &lt;%- site.name %&gt;&lt;/h1&gt;
 
             </code></pre>
             <p>Where <code>&lt;%- %&gt;</code> is an <strong>Interpolation</strong> operator for a <strong>Template Slot</strong>.</p>
+
+            <aside class="notes">
+              Note that "user.name" is user-input and editable, say through
+              their profile.  On the other hand "site.name" is "owned" by the
+              developer.
+            </aside>
           </section>
 
           <section data-transition="fade">
-          <p>What happens if someone updates my profile and changes my name from</p>
-          <p class="handWritey">&ldquo;Jeremy&rdquo;</p>
-          <p>to</p>
-          <p class="handWritey">&ldquo;&lt;/h1&gt;&lt;script&gt;<span class="fragment highlight-red">window.location='https://evil.com'</span>&lt;/script&gt;&rdquo;</p>
-          <p>?</p>
+            <p>What happens if someone updates my profile and changes my name from</p>
+            <p class="fragment handWritey">&ldquo;Jeremy&rdquo;</p>
+            <p class="fragment">to</p>
+            <p class="fragment"><span class="handWritey">&ldquo;&lt;/h1&gt;&lt;script&gt;window.location='https://evil.com'&lt;/script&gt;&rdquo;</span>?</p>
           </section>
 
           <section data-transition="fade">
@@ -147,7 +157,10 @@
   welcome to My Awesome Site&lt;/h1&gt;
 
             </code></pre>
-            <p class="fragment"><small>(boom)</small></p>
+
+            <aside class="notes">
+              The user is immediately redirected to evil.com!
+            </aside>
           </section>
 
           <section>
@@ -157,6 +170,10 @@
               <li class="fragment">Sanitize Output</li>
               <li class="fragment">Enable Content-Security-Policy</li>
             </ol>
+
+            <aside class="notes">
+              Each one on its own isn't a complete solution; a defense in depth is necessary.
+            </aside>
           </section>
 
           <section data-transition="fade">
@@ -174,12 +191,41 @@
             <pre class="fragment"><code class="language-javascript" contenteditable>
   var HANDEDNESS = ['Lefty','Righty','Ambidexterous','Other'];
             </code></pre>
-            <p class="fragment">but</p>
-            <p class="fragment roll-in">Human names don't fit into a convenient list :(</p>
+          </section>
+
+          <section data-transition="fade">
+            <h3>The Validation Conundrum</h3>
+            <p>Not everything can be Validated</p>
+            <p class="fragment">Human names don't fit into a convenient list :(</p>
+            <p class="fragment">You might say "anything but <code>&lt;&gt;</code>" to at least exclude HTML tags.</p>
+
+            <aside class="notes">
+              Names don't fit into regular expressions either.  It's still important to validate numeric/enum/etc. as it reduces overall complexity.
+            </aside>
+          </section>
+
+          <section data-transition="fade">
+            <h3>Radical Non-Validation</h3>
+            <p>When applied mindfully and with purpose...</p>
+            <p class="fragment roll-in">A radical idea (TODO: link to Etsy guy) is to <em>never</em> validate, making it easier to spot Sanitization failures</p>
+            <p class="fragment">Forces a heavier burden on Sanitization (and CSP)</p>
+            <p class="fragment">Requires continuous, automated fuzz-testing</p>
+
+            <aside class="notes">
+              Laziness is not an excuse for Non-Validation; has to be a mindful
+              part of the culture to lean on Sanitization + Fuzz testing.  The
+              benefit is that validation never "masks" a site where
+              sanitization isn't performed.  Also ask yourself: "do I have the
+              resources Etsy has?"
+            </aside>
           </section>
 
           <section data-transition="zoom">
             <h1>Sanitization</h1>
+
+            <aside class="notes">
+              Because Validating everything is maybe impossible.
+            </aside>
           </section>
 
           <section data-transition="fade">
@@ -187,6 +233,7 @@
             <small>(a.k.a. filtering, normalizing, or escaping)</small>
             <p class="fragment">Validation can't cover <em>everything</em>.</p>
             <p class="fragment">Prevents user-controlled data from <strong>breaking out</strong> of its context.</p>
+            <p class="fragment">Convert <em>unsafe</em> markup to <em>safe</em> markup.</p>
           </section>
 
           <section data-transition="fade">
@@ -215,6 +262,10 @@
             <p>Basically, entity-encode characters <strong>not</strong> in this RegExp set:</p>
             <p><code>[\t\n\v\f\r ,\.0-9A-Z_a-z\-\u00A0-\uFFFF]</code></p>
             <p><small>source: <a href="https://github.com/goinstant/secure-filters/blob/d21f04190a63f1cc55078e4eb96adafe864c79cf/lib/secure-filters.js#L67">secure-filters</a></small></p>
+
+            <aside class="notes">
+              By agressively escaping, and not just using the minimal list, we can prevent other weird break-out errors.  E.g. mXSS on Internet Explorer.
+            </aside>
           </section>
 
           <section data-transition="fade">
@@ -251,6 +302,11 @@
   welcome to My Awesome Site&lt;/h1&gt;
 
             </code></pre>
+
+            <aside class="notes">
+              Just to see if you're still awake, can you notice anything I forgot?
+              If you noticed I didn't escape the apostrophes, you're clearly on the ball.
+            </aside>
           </section>
 
           <section>
@@ -271,12 +327,12 @@
             </code></pre>
             <p class="fragment">+</p>
             <pre class="fragment"><code class="language-javascript" contenteditable>
-  { someJSON: JSON.stringify("&lt;/script&gt;&lt;script&gt;alert('pwn');") }
+  { someJSON: JSON.stringify("&lt;/script&gt;&lt;script&gt;alert('boom');//") }
             </code></pre>
             <p class="fragment">=</p>
-            <pre class="fragment"><code class="language-xml" contenteditable>
+            <pre class="fragment"><code class="language-html" contenteditable>
   &lt;script&gt;
-    var foo = "&lt;/script&gt;&lt;script&gt;alert('pwn');";
+    var foo = "&lt;/script&gt;&lt;script&gt;alert('boom');//";
   &lt;/script&gt;
             </code></pre>
           </section>
@@ -289,14 +345,13 @@
           <section data-transition="fade">
             <h3>There's more!</h3>
             <p>Let's say we JavaScript-string-literal escape</p>
-            <p><code>"&lt;"</code> becomes <code>"\x3C"</code>, etc.</p>
+            <p><code>&lt;</code> becomes <code>\x3C</code>, etc.</p>
             <pre class="fragment"><code class="language-xml" contenteditable>
   &lt;script&gt;
-    var userName = "Jeremy\x3Cscript\x3Ealert('(boom)')\x3C/script\x3E";
+    var userName = "Jeremy\x3Cscript\x3Ealert('boom')\x3C/script\x3E";
     element.innerHTML = "&lt;span&gt;"+userName+"&lt;/span&gt;";
   &lt;/script&gt;
             </code></pre>
-            <p class="fragment"><small>(boom)</small></p>
           </section>
 
           <section data-transition="fade">
@@ -312,7 +367,7 @@
             <pre class="fragment"><code class="language-xml" contenteditable>
   &lt;a href="/show?user=42&amp;amp;user=666"&gt;...&lt;/a&gt;;
             </code></pre>
-            <p class="fragment"><code>https://example.com/show?user=42&user=666</code> maybe shows user 666 now?</p>
+            <p class="fragment"><code>https://example.com/show?user=42&amp;user=666</code> maybe shows user 666 now?</p>
           </section>
 
           <section data-transition="fade">
@@ -444,22 +499,51 @@
             <p class="fragment">Pages define an Allow-List of what features (and their Origins) are permissible.</p>
             <p class="fragment">Serve as a HTTP header (or use a <code>&lt;meta&gt;</code> HTML tag)</p>
             <pre class="fragment"><code class="language-http" contenteditable>
-    Content-Security-Policy: default-src: 'none';
-      connect-src: ws-and-xhr.example.com;
-      font-src: https://fonts.googleapis.com;
-      frame-src: 'none';
-      media-src: youtube.com, ytimg.com;
-      script-src: https://example-cdn.com, https://cloudflare.com;
-      style-src: https://example-cdn.com;
+    Content-Security-Policy:
+      default-src 'none';
+      connect-src ws-and-xhr.example.com;
+      font-src https://fonts.googleapis.com;
+      frame-src 'none';
+      media-src youtube.com, ytimg.com;
+      script-src https://example-cdn.com, https://cloudflare.com;
+      style-src https://example-cdn.com;
             </code></pre>
           </section>
 
           <section data-transition="fade">
-            <p>TODO: restate original injection attack example</p>
+            <p>Remember this?</p>
+            <pre><code class="language-html" contenteditable>
+
+  &lt;h1&gt;Hello &lt;/h1&gt;
+  &lt;script&gt;window.location='https://evil.com'&lt;/script&gt;,
+  welcome to My Awesome Site&lt;/h1&gt;
+
+            </code></pre>
+            <p>It could have been prevented with restricting scripts <strong>sourced</strong> from the same Origin:</p>
+            <pre class="fragment"><code class="language-http" contenteditable>
+  Content-Security-Policy: script-src 'self'
+            </code></pre>
           </section>
 
           <section data-transition="fade">
-            <p>TODO: show how CSP would have saved us from that injection attack example</p>
+            <p>With <code>script-src 'self'</code>, <strong>all</strong> unknown script sources are also blocked:</p>
+            <pre class="fragment"><code class="language-html" contenteditable>
+  &lt;!-- allowed by CSP: --&gt;
+  &lt;script src="/main.js"&gt;&lt;/script&gt;
+  &lt;!-- blocked by CSP: --&gt;
+  &lt;script src="https://evil.com/attack.js"&gt;&lt;/script&gt;
+            </code></pre>
+          </section>
+
+          <section data-transition="fade">
+            <p>Consequently, to <em>allow</em> inline script blocks, instead of ...</p>
+            <pre class="fragment"><code class="language-http" contenteditable>
+  Content-Security-Policy: script-src 'self'
+            </code></pre>
+            <p class="fragment">... we'd need to say ...</p>
+            <pre class="fragment"><code class="language-http" contenteditable>
+  Content-Security-Policy: script-src 'self', 'unsafe-inline'
+            </code></pre>
           </section>
 
           <section>
@@ -468,6 +552,15 @@
 
           <section data-transition="linear">
             <h3><code>require('helmet')</code></h3>
+            <a href="https://www.npmjs.org/package/helmet">npmjs.org/package/helmet</a>
+            <p>Connect middleware that does CSP <em>and more!</em></p>
+            <pre><code class="language-javascript" contenteditable>
+    var helmet = require('helmet');
+    var app = express(); // or connect
+    app.use(helmet.csp());
+    app.use(helmet.xframe('deny'));
+    app.use(helmet.contentTypeOptions());
+            </code></pre>
           </section>
 
           <section data-transition="linear">
@@ -509,11 +602,14 @@
             <p>Say <code>evil.com</code> has the following HTML:</p>
             <pre><code class="language-html" contenteditable>
   &lt;title&gt;Welcome to Evil.com&lt;/title&gt;
-  &lt;script src="https://example.com/api/inviteAdmin?email=hacker@evil.com"&gt;
+  &lt;script src="https://example.com/api/inviteAdmin?email=hacker@evil.com"&gt;&lt;/script&gt;
             </code></pre>
             <p class="fragment">Even though you're <em>visiting</em> <code>evil.com</code>,</p>
             <p class="fragment">you're <em>still authenticated</em> with <code>example.com</code>!</p>
-            <p class="fragment"><small>(boom)</small></p>
+
+            <aside class="notes">
+              and you just invited hacker@evil.com to your account!
+            </aside>
           </section>
 
           <section>
@@ -531,21 +627,21 @@
 
           <section data-transition="fade">
             <h3>In Technical terms:</h3>
-            <q>"The user was on my website ..."</q>
+            <q class="handWritey">"The user was on my website ..."</q>
             <p>=</p>
             <p>Provide the user a unique, <em>secret</em> Anti-CSRF token in addition to their login-cookie.</p>
           </section>
 
           <section data-transition="fade">
-            <q>"... then they clicked submit on a form ..."</q>
+            <q class="handWritey">"... then they clicked submit on a form ..."</q>
             <p>=</p>
-            <p class="fragment">Actions that change <strong>application state</strong> should be <code>POST/PUT/PATCH/DELETE</code></p>
+            <p class="fragment">Actions that change <strong>application state</strong> should be <code>POST</code>/<code>PUT</code>/<code>PATCH</code>/<code>DELETE</code></p>
             <p class="fragment"><small>(consistent with the REST Architectural Style)</small></p>
-            <p class="fragment"><strong>Note:</strong> that <code>POST/etc.</code> on its own is <em>not enough</em> to stop CSRF!</p>
+            <p class="fragment"><strong>Note:</strong> that <code>POST</code>/etc. on its own is <em>not enough</em> to stop CSRF!</p>
           </section>
 
           <section data-transition="fade">
-            <q>"... therefore, this isn't a Cross-Site Forgery"</q>
+            <q class="handWritey">"... therefore, this isn't a Cross-Site Forgery"</q>
             <p>=</p>
             <p>Validate the Anti-CSRF token, which <strong>MUST</strong> be kept secret from attackers</p>
           </section>
@@ -613,7 +709,7 @@
           <section data-transition="fade">
             <h3>Forced-use of <code>GET</code> (2/2)</h3>
             <p class="fragment"><strong>Idea:</strong> Include the <code>_csrf</code> value as a query param on the link.</p>
-            <p class="fragment">Works, but <code>app.use(connect.csrf())</code> doesn't check <code>GET</code> requests</p>
+            <p class="fragment">Works, but Connect's CSRF middleware doesn't check <code>GET</code> requests!</p>
           </section>
 
           <section>
@@ -635,6 +731,24 @@
 
           <section>
             <h1>Trust</h1>
+          </section>
+
+          <section>
+            <h1>XSS</h1>
+            <ol>
+              <li>Validate Inputs <small>(or be Radical)</small></li>
+              <li>Sanitize Outputs</li>
+              <li>Use Content-Security-Policy</li>
+            </ol>
+          </section>
+
+          <section>
+            <h1>CSRF</h1>
+            <ol>
+              <li>Verify intent</li>
+              <li>Be a good REST citizen</li>
+              <li>Use Anti-CSRF tokens</li>
+            </ol>
           </section>
 
           <section>
@@ -674,9 +788,11 @@
 				// Optional libraries used to extend on reveal.js
 				dependencies: [
 					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
-					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+//					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+//					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() {
+              hljs.initHighlightingOnLoad();
+          } },
 					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
 					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
 				]
