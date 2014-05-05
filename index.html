@@ -206,23 +206,6 @@
             </aside>
           </section>
 
-          <!-- <section data-transition="fade"> -->
-          <!--   <h3>Radical Non-Validation</h3> -->
-          <!--   <a href="http://www.slideshare.net/zanelackey/attackdriven-defense">slideshare.net/zanelackey/attackdriven-defense</a> -->
-          <!--   <p>When applied mindfully and with purpose...</p> -->
-          <!--   <p class="fragment roll-in">A radical idea is to <em>never</em> validate, making it easier to spot Sanitization failures</p> -->
-          <!--   <p class="fragment">Forces a heavier burden on Sanitization (and CSP)</p> -->
-          <!--   <p class="fragment">Requires continuous, automated fuzz-testing</p> -->
-
-          <!--   <aside class="notes"> -->
-          <!--     Laziness is not an excuse for Non-Validation; has to be a mindful -->
-          <!--     part of the culture to lean on Sanitization + Fuzz testing.  The -->
-          <!--     benefit is that validation never "masks" a site where -->
-          <!--     sanitization isn't performed.  Also ask yourself: "do I have the -->
-          <!--     resources Etsy has?" -->
-          <!--   </aside> -->
-          <!-- </section> -->
-
           <section data-transition="zoom">
             <h1>Sanitization</h1>
 
@@ -519,7 +502,7 @@
       default-src 'none';
       connect-src ws-and-xhr.example.com;
       font-src https://fonts.googleapis.com;
-      frame-src 'none';
+      frame-src 'self';
       media-src youtube.com, ytimg.com;
       script-src https://example-cdn.com, https://cloudflare.com;
       style-src https://example-cdn.com;
