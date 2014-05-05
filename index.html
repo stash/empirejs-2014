@@ -306,6 +306,10 @@
 
           <section data-transition="fade">
             <p><img src="secure-filters%20cheat%20sheet.png" alt="[secure filters cheat sheet]" style="border:0"></p>
+            <aside class="notes">
+              All of these places, when given an un-Validated user-controlled
+              input can be used to inject code or cause unexpected behaviour.
+            </aside>
           </section>
 
           <section data-transition="fade">
@@ -404,13 +408,13 @@
           <section data-transition="fade">
             <h2>Angular.js</h2>
             <h3>Strict Contextual Escaping</h3>
-            <a href="https://docs.angularjs.org/api/ng/service/$sce">docs.angularjs.org/api/ng/service/$sce</a>
+            <p><small><a href="https://docs.angularjs.org/api/ng/service/$sce">docs.angularjs.org/api/ng/service/$sce</a></small></p>
             <p>The <code>{{ }}</code> operator and <code>ng-</code> attributes are context-aware!</p>
           </section>
 
           <section data-transition="linear">
             <h2>React &amp; JSX</h2>
-            <a href="https://facebook.github.io/react/docs/jsx-in-depth.html">facebook.github.io/react/docs/jsx-in-depth.html</a>
+            <p><small><a href="https://facebook.github.io/react/docs/jsx-in-depth.html">facebook.github.io/react/docs/jsx-in-depth.html</a></small></p>
             <p>DOM manipulation macros are available without JSX:</p>
             <pre><code class="language-javascript">
   var link = React.DOM.a({href: 'https://example.com/'}, 'React');
@@ -423,13 +427,13 @@
 
           <section data-transition="linear">
             <h2>Java: OWASP enterprise Security API</h2>
-            <a href="https://www.owasp.org/index.php/Category:OWASP_Enterprise_Security_API">OWASP ESAPI</a>
+            <p><small><a href="https://www.owasp.org/index.php/Category:OWASP_Enterprise_Security_API">OWASP wiki: ESAPI</a></small></p>
             <p>Has APIs for escaping output, as well as input-validation helpers, anti-CSRF and more.</p>
           </section>
 
           <section data-transition="linear">
             <h2>JavaScript: GoInstant secure-filters</h2>
-            <a href="https://www.npmjs.org/package/secure-filters">www.npmjs.org/package/secure-filters</a>
+            <p><small><a href="https://www.npmjs.org/package/secure-filters">www.npmjs.org/package/secure-filters</a></small></p>
             <p>Works in node.js and browsers, includes EJS support</p>
             <pre><code class="language-xml" contenteditable>
   &lt;script&gt;
@@ -440,12 +444,11 @@
   &lt;a href="javascript:activate('&lt;%-: userId |jsAttr%&gt;')"&gt;
     Click here to activate&lt;/a&gt;
             </code></pre>
-            <small>(disclaimer: I'm the primary author of secure-filters)</small>
           </section>
 
           <section data-transition="linear">
             <h2>PHP: Phalcon\Escaper</h2>
-            <a href="http://docs.phalconphp.com/en/latest/reference/escaper.html">docs.phalconphp.com/en/latest/reference/escaper.html</a>
+            <p><small><a href="http://docs.phalconphp.com/en/latest/reference/escaper.html">docs.phalconphp.com/en/latest/reference/escaper.html</a></small></p>
             <p>Good selection of output filters</p>
             <pre><code class="language-php" contenteditable>
   &lt;title&gt;&lt;?php echo $e-&gt;escapeHtml($maliciousTitle) ?&gt;&lt;/title&gt;
@@ -464,7 +467,7 @@
 
           <section data-transition="linear">
             <h3>Go <code>html/template</code></h3>
-            <a href="http://golang.org/pkg/html/template/">golang.org/pkg/html/template/</a>
+            <p><small><a href="http://golang.org/pkg/html/template/">golang.org/pkg/html/template/</a></small></p>
             <p>Based on <a href="http://wiki.ecmascript.org/doku.php?id=harmony:quasis">EcmaScript Harmony "Quasis"</a> (a.k.a. Tagged Template Strings)</p>
             <pre><code class="language-html" contenteditable>
   &lt;a href="/search?q={{.}}"&gt;{{.}}&lt;/a&gt;
@@ -475,9 +478,28 @@
             </code></pre>
           </section>
 
+
+          <section>
+            <blockquote>Should I sanitize inputs?</blockquote>
+          </section>
+
+          <section data-transition="zoom">
+            <h1>No!</h1>
+          </section>
+
+          <section data-transition="fade">
+            <h3>Why not to Sanitize Input</h3>
+            <p>Sanitizing input <em>permanently</em> modifies the data.</p>
+            <p class="fragment">Sanitization is fairly cheap and highly cacheable!</p>
+
+            <aside class="notes">
+              Sanitize Output only
+            </aside>
+          </section>
+
           <section>
             <h1>Content-Security-Policy</h1>
-            <p>Latest: <a href="https://github.com/w3c/webappsec">github.com/w3c/webappsec</a></p>
+            <p><small><a href="https://github.com/w3c/webappsec">github.com/w3c/webappsec</a></small></p>
           </section>
 
           <section data-transition="fade">
@@ -673,7 +695,7 @@
   var token = req.csrfToken();
   res.render('template', { _csrf: token });
             </code></pre>
-            <p class="fragment">(Connect's CSRF middleware is also <a href="http://breachattack.com/">BREACH attack</a> resistant)</p>
+            <!-- <p class="fragment">(Connect's CSRF middleware is also <a href="http://breachattack.com/">BREACH attack</a> resistant)</p> -->
           </section>
 
           <section data-transition="fade">
