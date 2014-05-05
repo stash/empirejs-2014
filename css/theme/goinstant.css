@@ -1,3 +1,4 @@
+@import url(https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic);
 /**
  * Sky theme for reveal.js.
  *
@@ -37,7 +38,7 @@ body {
   background-color: #f7fcfc; }
 
 .reveal {
-  font-family: "Proxima Nova", sans-serif;
+  font-family: "Proxima Nova", "Lato", "Open Sans", sans-serif;
   font-size: 36px;
   font-weight: normal;
   letter-spacing: -0.02em;
@@ -59,7 +60,7 @@ body {
 .reveal h6 {
   margin: 0 0 20px 0;
   color: #333333;
-  font-family: "Proxima Nova", sans-serif;
+  font-family: "Proxima Nova", "Lato", "Open Sans", sans-serif;
   font-weight: 700;
   line-height: 0.9em;
   letter-spacing: -0.04em;

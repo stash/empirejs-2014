@@ -10,14 +10,15 @@
 @import "../template/settings";
 // ---------------------------------------------
 
-
+// fallback from proxima nova to Lato
+@import url(https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic);
 
 // Override theme settings (see ../template/settings.scss)
-$mainFont: 'Proxima Nova', sans-serif;
+$mainFont: 'Proxima Nova', 'Lato', 'Open Sans', sans-serif;
 $mainColor: #333;
 $mainFontWeight: normal;
 
-$headingFont: 'Proxima Nova', sans-serif;
+$headingFont: 'Proxima Nova', 'Lato', 'Open Sans', sans-serif;
 $headingFontWeight: 700;
 $headingColor: #333;
 $headingLetterSpacing: -0.04em; //-0.08em;
