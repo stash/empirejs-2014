@@ -70,15 +70,17 @@
           <section data-transition="fade">
             <h3 class="handWritey">Security &isin; Trust</h3>
             <aside class="notes">
-              Security, and web security, are part of how we establish and
-              maintain that trust.
+              Security, and specifically web security, are part of how we
+              establish and maintain that trust. But all too often, it's not on
+              our list of priorities.
             </aside>
           </section>
 
           <section data-transition="fade">
             <h3 class="handWritey">Vulnerabilties &notin; Trust</h3>
             <aside class="notes">
-              Allowing vulnerabilities in our web apps erodes that trust, so we strive to PREVENT as many as possible.
+              Allowing vulnerabilities in our web apps erodes that trust, so we
+              strive to PREVENT as many as possible.
             </aside>
           </section>
 
@@ -91,7 +93,7 @@
           </section>
 
           <section>
-            <h3>This talk is an introduction to</h3>
+            <h3>This talk is an introduction to two common web vulnerabilities</h3>
             <p class="fragment roll-in">XSS (Cross Site Scripting)</p>
             <p class="fragment roll-in">CSRF (Cross Site Request Forgery)</p>
             <p class="fragment"><strong>And how to prevent (or fix) them.</strong></p>
@@ -195,30 +197,31 @@
 
           <section data-transition="fade">
             <h3>The Validation Conundrum</h3>
-            <p>Not everything can be Validated</p>
+            <p>Not everything can be Validated against an Allow List</p>
             <p class="fragment">Human names don't fit into a convenient list :(</p>
-            <p class="fragment">You might say "anything but <code>&lt;&gt;</code>" to at least exclude HTML tags.</p>
+            <p class="fragment">Instead, you might say "anything but <code>&lt;&gt;</code>" to at least exclude HTML tags.</p>
 
             <aside class="notes">
               Names don't fit into regular expressions either.  It's still important to validate numeric/enum/etc. as it reduces overall complexity.
             </aside>
           </section>
 
-          <section data-transition="fade">
-            <h3>Radical Non-Validation</h3>
-            <p>When applied mindfully and with purpose...</p>
-            <p class="fragment roll-in">A radical idea (TODO: link to Etsy guy) is to <em>never</em> validate, making it easier to spot Sanitization failures</p>
-            <p class="fragment">Forces a heavier burden on Sanitization (and CSP)</p>
-            <p class="fragment">Requires continuous, automated fuzz-testing</p>
+          <!-- <section data-transition="fade"> -->
+          <!--   <h3>Radical Non-Validation</h3> -->
+          <!--   <a href="http://www.slideshare.net/zanelackey/attackdriven-defense">slideshare.net/zanelackey/attackdriven-defense</a> -->
+          <!--   <p>When applied mindfully and with purpose...</p> -->
+          <!--   <p class="fragment roll-in">A radical idea is to <em>never</em> validate, making it easier to spot Sanitization failures</p> -->
+          <!--   <p class="fragment">Forces a heavier burden on Sanitization (and CSP)</p> -->
+          <!--   <p class="fragment">Requires continuous, automated fuzz-testing</p> -->
 
-            <aside class="notes">
-              Laziness is not an excuse for Non-Validation; has to be a mindful
-              part of the culture to lean on Sanitization + Fuzz testing.  The
-              benefit is that validation never "masks" a site where
-              sanitization isn't performed.  Also ask yourself: "do I have the
-              resources Etsy has?"
-            </aside>
-          </section>
+          <!--   <aside class="notes"> -->
+          <!--     Laziness is not an excuse for Non-Validation; has to be a mindful -->
+          <!--     part of the culture to lean on Sanitization + Fuzz testing.  The -->
+          <!--     benefit is that validation never "masks" a site where -->
+          <!--     sanitization isn't performed.  Also ask yourself: "do I have the -->
+          <!--     resources Etsy has?" -->
+          <!--   </aside> -->
+          <!-- </section> -->
 
           <section data-transition="zoom">
             <h1>Sanitization</h1>
@@ -232,8 +235,8 @@
             <h3>Step 2: Sanitization</h3>
             <small>(a.k.a. filtering, normalizing, or escaping)</small>
             <p class="fragment">Validation can't cover <em>everything</em>.</p>
-            <p class="fragment">Prevents user-controlled data from <strong>breaking out</strong> of its context.</p>
-            <p class="fragment">Convert <em>unsafe</em> markup to <em>safe</em> markup.</p>
+            <p class="fragment">Goal: Prevent user-controlled data from <strong>breaking out</strong> of its context.</p>
+            <p class="fragment">Means: Convert <em>unsafe</em> markup to <em>safe</em> markup.</p>
           </section>
 
           <section data-transition="fade">
@@ -310,12 +313,16 @@
           </section>
 
           <section>
-            <blockquote>Do I just have to worry about escaping HTML?</blockquote>
+            <blockquote>So... I just have to worry about escaping HTML?</blockquote>
           </section>
 
           <section data-transition="zoom">
             <h2>No</h2>
             <p>There's more to it than HTML entity-encoding!</p>
+          </section>
+
+          <section data-transition="fade">
+            <p><img src="secure-filters%20cheat%20sheet.png" alt="[secure filters cheat sheet]" style="border:0"></p>
           </section>
 
           <section data-transition="fade">
@@ -338,14 +345,23 @@
           </section>
 
           <section data-transition="fade">
-            <h3>What the How?!</h3>
-            <p><code>&lt;script&gt;</code> is parsed <em>before</em> the JavaScript <code>&quot;</code>!</p>
+            <h3>Sanitizing JavaScript Literals</h3>
+            <p>In strings, things like <code>&lt;</code> become <code>\x3C</code>, etc.</p>
+            <pre class="fragment"><code class="language-html" contenteditable>
+  &lt;script&gt;
+    var foo = "&lt;/script&gt;&lt;script&gt;alert('boom');//";
+  &lt;/script&gt;
+            </code></pre>
+            <p class="fragment">... becomes ...</p>
+            <pre class="fragment"><code class="language-html" contenteditable>
+  &lt;script&gt;
+    var foo = "\x3C/script\x3E\x3Cscript\x3Ealert('boom');//";
+  &lt;/script&gt;
+            </code></pre>
           </section>
 
           <section data-transition="fade">
-            <h3>There's more!</h3>
-            <p>Let's say we JavaScript-string-literal escape</p>
-            <p><code>&lt;</code> becomes <code>\x3C</code>, etc.</p>
+            <h3>JavaScript sanitization doesn't save you from <code>innerHTML</code></h3>
             <pre class="fragment"><code class="language-xml" contenteditable>
   &lt;script&gt;
     var userName = "Jeremy\x3Cscript\x3Ealert('boom')\x3C/script\x3E";
@@ -367,11 +383,16 @@
             <pre class="fragment"><code class="language-xml" contenteditable>
   &lt;a href="/show?user=42&amp;amp;user=666"&gt;...&lt;/a&gt;;
             </code></pre>
-            <p class="fragment"><code>https://example.com/show?user=42&amp;user=666</code> maybe shows user 666 now?</p>
+            <p class="fragment">The server sees <code>https://example.com/show?user=42&amp;user=666</code>, so maybe shows user 666 now?</p>
+
+            <aside class="notes">
+              Maybe the server overrides 42 with 666 for the user ID, but some
+              might parse this as an Array instead.
+            </aside>
           </section>
 
           <section data-transition="fade">
-            <h3>URI-escaping</h3>
+            <h3>Sanitizing via URI-escaping</h3>
             <p>Convert unsafe characters to <code>%XX</code> UTF-8 octets.</p>
             <p>E.g. <code>&amp;</code> to <code>%26</code></p>
             <pre class="fragment"><code class="language-xml" contenteditable>
@@ -383,15 +404,10 @@
           <section data-transition="fade">
             <h3>Other contexts</h3>
             <ul>
-              <li class="fragment">CSS variables (can run JavaScript via <code>expression()</code>!)</li>
-              <li class="fragment">JavaScript-in-HTML-attributes</li>
+              <li class="fragment">JavaScript-in-HTML-attributes are a special kind of evil</li>
               <li class="fragment">SVG</li>
               <li class="fragment">... and surely more that I haven't thought of yet</li>
             </ul>
-          </section>
-
-          <section data-transition="fade">
-            <p>Escaping has to be <strong>context-sensitive</strong></p>
           </section>
 
           <section>
