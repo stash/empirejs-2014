@@ -87,8 +87,7 @@
           <section data-transition="fade">
             <h3 class="handWritey">Prevention &nbsp;&gt;Repair</h3>
             <aside class="notes">
-              Prevention, through following good practices, is often the best
-              thing we can do as JavaScripters
+              Being proactive, rather than reactive, is the best thing we can do.
             </aside>
           </section>
 
@@ -217,9 +216,14 @@
           <section data-transition="fade">
             <h3>Step 2: Sanitization</h3>
             <small>(a.k.a. filtering, normalizing, or escaping)</small>
-            <p class="fragment">Validation can't cover <em>everything</em>.</p>
             <p class="fragment">Goal: Prevent user-controlled data from <strong>breaking out</strong> of its context.</p>
             <p class="fragment">Means: Convert <em>unsafe</em> markup to <em>safe</em> markup.</p>
+
+            <aside class="notes">
+               Validation can't cover <em>everything</em>.
+              Convert <em>unsafe</em> markup to <em>safe</em> markup.
+              Because Validating everything is maybe impossible.
+            </aside>
           </section>
 
           <section data-transition="fade">
@@ -255,7 +259,7 @@
           </section>
 
           <section data-transition="fade">
-            <h3>Fixed example (EJS)</h3>
+            <h3>Sanitizing the example (EJS)</h3>
             <p>Change ...</p>
             <pre class="fragment"><code class="language-html" contenteditable>
 
@@ -284,15 +288,11 @@
             <pre class="fragment"><code class="language-html" contenteditable>
 
   &lt;h1&gt;Hello &amp;lt;/h1&amp;gt;
-  &amp;lt;script&amp;gt;window.location='https://evil.com'&amp;lt;/script&amp;gt;,
+  &amp;lt;script&amp;gt;window.location=&amp;#39;https://evil.com&amp;#39;&amp;lt;/script&amp;gt;,
   welcome to My Awesome Site&lt;/h1&gt;
 
             </code></pre>
 
-            <aside class="notes">
-              Just to see if you're still awake, can you notice anything I forgot?
-              If you noticed I didn't escape the apostrophes, you're clearly on the ball.
-            </aside>
           </section>
 
           <section>
@@ -388,15 +388,6 @@
             <p class="fragment">Luckily, <code>parseInt("42&amp;user=666")</code> evaluates to <code>42</code>.</p>
           </section>
 
-          <section data-transition="fade">
-            <h3>Other contexts</h3>
-            <ul>
-              <li class="fragment">JavaScript-in-HTML-attributes are a special kind of evil</li>
-              <li class="fragment">SVG</li>
-              <li class="fragment">... and surely more that I haven't thought of yet</li>
-            </ul>
-          </section>
-
           <section>
             <blockquote>Are there any tools to help me with Sanitization?</blockquote>
           </section>
@@ -444,6 +435,7 @@
   &lt;a href="javascript:activate('&lt;%-: userId |jsAttr%&gt;')"&gt;
     Click here to activate&lt;/a&gt;
             </code></pre>
+            <p>Can use these as regular functions too</p>
           </section>
 
           <section data-transition="linear">
@@ -508,11 +500,6 @@
             <p class="fragment">... and Sanitization can't catch <em>all</em> the cases...</p>
             <p class="fragment"><small>(but you should still do them!)</small></p>
             <p class="fragment">... we needed something more!</p>
-          </section>
-
-          <section data-transition="fade">
-            <h3>CSP</h3>
-            <p class="fragment">Pages define an Allow-List of what features (and their Origins) are permissible.</p>
           </section>
 
           <section data-transition="fade">
@@ -650,7 +637,7 @@
             <h3>In Technical terms:</h3>
             <q class="handWritey">"The user was on my website ..."</q>
             <p>=</p>
-            <p>Provide the user a unique, <em>secret</em> Anti-CSRF token in addition to their login-cookie.</p>
+            <p>Put into any Forms a unique, <em>secret</em> Anti-CSRF token that's tied to their login-cookie.</p>
           </section>
 
           <section data-transition="fade">
@@ -658,13 +645,14 @@
             <p>=</p>
             <p class="fragment">Actions that change <strong>application state</strong> should be <code>POST</code>/<code>PUT</code>/<code>PATCH</code>/<code>DELETE</code></p>
             <p class="fragment"><small>(consistent with the REST Architectural Style)</small></p>
-            <p class="fragment"><strong>Note:</strong> that <code>POST</code>/etc. on its own is <em>not enough</em> to stop CSRF!</p>
+            <p class="fragment"><strong>Note:</strong> that <code>POST</code>/etc. on its own is <em>not enough</em> to stop CSRF based on XHR!</p>
           </section>
 
           <section data-transition="fade">
             <q class="handWritey">"... therefore, this isn't a Cross-Site Forgery"</q>
             <p>=</p>
-            <p>Validate the Anti-CSRF token, which <strong>MUST</strong> be kept secret from attackers</p>
+            <p>Validate the Anti-CSRF token, which since it was a secret, the attacker can't know.</p>
+            <p>Note: HTTP isn't very good at keeping secrets, so consider the importance of HTTPS.</p>
           </section>
 
           <section>
@@ -716,21 +704,13 @@
           </section>
 
           <section>
-            <blockquote>What if I <em>have</em> to use a <code>GET</code>?</blockquote>
+            <blockquote>Are there ways to verify intent without a CSRF token?</blockquote>
           </section>
 
           <section data-transition="fade">
-            <h3>Forced-use of <code>GET</code> (1/2)</h3>
-            <p>Is there some other way to verify that the Human intended to do this?</p>
-            <p class="fragment"><strong>Idea:</strong> If it's a link to be clicked, convert the link to invoke a form-<code>POST</code> instead!</p>
-            <p class="fragment"><strong>Idea:</strong> If not, ask the user for confirmation.</p>
+            <h3>Some intent verification ideas</h3>
+            <p class="fragment"><strong>Idea:</strong> ask the user for confirmation (just make sure the confirmation isn't CSRF-attackable and is server-controlled)</p>
             <p class="fragment"><strong>Idea:</strong> For <em>really</em> sensitive operations, re-prompting for a password is good, especially for long-lived sessions</p>
-          </section>
-
-          <section data-transition="fade">
-            <h3>Forced-use of <code>GET</code> (2/2)</h3>
-            <p class="fragment"><strong>Idea:</strong> Include the <code>_csrf</code> value as a query param on the link.</p>
-            <p class="fragment">Works, but Connect's CSRF middleware doesn't check <code>GET</code> requests!</p>
           </section>
 
           <section>
@@ -739,7 +719,7 @@
             <ol>
               <li class="fragment roll-in"><strong>Verify intent</strong>: did the user do this action?</li>
               <li class="fragment roll-in"><strong>Be a good REST citizen</strong>: Use <code>POST</code>/<code>PUT</code>/etc. instead of <code>GET</code>.</li>
-              <li class="fragment roll-in"><strong>Use Anti-CSRF tokens</strong>: confirms presence, identity and intent.</li>
+              <li class="fragment roll-in"><strong>Use Anti-CSRF tokens</strong>: ties together presence on the site and intent.</li>
             </ol>
           </section>
 
@@ -766,7 +746,7 @@
           <section>
             <h1>CSRF</h1>
             <ol>
-              <li>Verify intent</li>
+              <li>Verify user intent</li>
               <li>Be a good REST citizen</li>
               <li>Use Anti-CSRF tokens</li>
             </ol>
