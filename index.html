@@ -47,7 +47,8 @@
 
         <section id="titleSlide">
           <h1>Preventing XSS and CSRF</h1>
-          <h3>Jeremy Stashewsky, goinstant.com</h3>
+          <h3>Jeremy Stashewsky, <a href="https://goinstant.com">GoInstant</a></h3>
+          <p><a href="https://twitter.com/jstash">@jstash</a></p>
         </section>
 
         <section>
@@ -181,6 +182,7 @@
             <p><img src="anti-xss%20data%20flow%20good.png" alt="[anti-xss data flow]" style="border:0"></p>
           </section>
 
+
           <section data-transition="zoom">
             <h1>Validation</h1>
           </section>
@@ -295,6 +297,7 @@
 
           </section>
 
+
           <section>
             <blockquote>So... I just have to worry about escaping HTML?</blockquote>
           </section>
@@ -305,7 +308,7 @@
           </section>
 
           <section data-transition="fade">
-            <p><img src="secure-filters%20cheat%20sheet.png" alt="[secure filters cheat sheet]" style="border:0"></p>
+            <p><img src="contextual-filtering.png" alt="[secure filters contextual filtering]" style="border:0"></p>
             <aside class="notes">
               All of these places, when given an un-Validated user-controlled
               input can be used to inject code or cause unexpected behaviour.
@@ -388,6 +391,7 @@
             <p class="fragment">Luckily, <code>parseInt("42&amp;user=666")</code> evaluates to <code>42</code>.</p>
           </section>
 
+
           <section>
             <blockquote>Are there any tools to help me with Sanitization?</blockquote>
           </section>
@@ -396,34 +400,8 @@
             <h1>Yes!</h1>
           </section>
 
-          <section data-transition="fade">
-            <h2>Angular.js</h2>
-            <h3>Strict Contextual Escaping</h3>
-            <p><small><a href="https://docs.angularjs.org/api/ng/service/$sce">docs.angularjs.org/api/ng/service/$sce</a></small></p>
-            <p>The <code>{{ }}</code> operator and <code>ng-</code> attributes are context-aware!</p>
-          </section>
-
           <section data-transition="linear">
-            <h2>React &amp; JSX</h2>
-            <p><small><a href="https://facebook.github.io/react/docs/jsx-in-depth.html">facebook.github.io/react/docs/jsx-in-depth.html</a></small></p>
-            <p>DOM manipulation macros are available without JSX:</p>
-            <pre><code class="language-javascript">
-  var link = React.DOM.a({href: 'https://example.com/'}, 'React');
-            </code></pre>
-            <p>Or, conveniently in JSX:</p>
-            <pre><code class="language-xml">
-  var link = &lt;a href="https://example.com/"&gt;React&lt;/a&gt;;
-            </code></pre>
-          </section>
-
-          <section data-transition="linear">
-            <h2>Java: OWASP enterprise Security API</h2>
-            <p><small><a href="https://www.owasp.org/index.php/Category:OWASP_Enterprise_Security_API">OWASP wiki: ESAPI</a></small></p>
-            <p>Has APIs for escaping output, as well as input-validation helpers, anti-CSRF and more.</p>
-          </section>
-
-          <section data-transition="linear">
-            <h2>JavaScript: GoInstant secure-filters</h2>
+            <h2>JavaScript: secure-filters</h2>
             <p><small><a href="https://www.npmjs.org/package/secure-filters">www.npmjs.org/package/secure-filters</a></small></p>
             <p>Works in node.js and browsers, includes EJS support</p>
             <pre><code class="language-xml" contenteditable>
@@ -457,6 +435,32 @@
             </code></pre>
           </section>
 
+          <section data-transition="fade">
+            <h2>Angular.js</h2>
+            <h3>Strict Contextual Escaping</h3>
+            <p><small><a href="https://docs.angularjs.org/api/ng/service/$sce">docs.angularjs.org/api/ng/service/$sce</a></small></p>
+            <p>The <code>{{ }}</code> operator and <code>ng-</code> attributes are context-aware!</p>
+          </section>
+
+          <section data-transition="linear">
+            <h2>React &amp; JSX</h2>
+            <p><small><a href="https://facebook.github.io/react/docs/jsx-in-depth.html">facebook.github.io/react/docs/jsx-in-depth.html</a></small></p>
+            <p>DOM manipulation macros are available without JSX:</p>
+            <pre><code class="language-javascript">
+  var link = React.DOM.a({href: 'https://example.com/'}, 'React');
+            </code></pre>
+            <p>Or, conveniently in JSX:</p>
+            <pre><code class="language-xml">
+  var link = &lt;a href="https://example.com/"&gt;React&lt;/a&gt;;
+            </code></pre>
+          </section>
+
+          <section data-transition="linear">
+            <h2>Java: OWASP Enterprise Security API</h2>
+            <p><small><a href="https://www.owasp.org/index.php/Category:OWASP_Enterprise_Security_API">OWASP wiki: ESAPI</a></small></p>
+            <p>Has APIs for escaping output, as well as input-validation helpers, anti-CSRF and more.</p>
+          </section>
+
           <section data-transition="linear">
             <h3>Go <code>html/template</code></h3>
             <p><small><a href="http://golang.org/pkg/html/template/">golang.org/pkg/html/template/</a></small></p>
@@ -477,6 +481,10 @@
 
           <section data-transition="zoom">
             <h1>No!</h1>
+
+            <aside class="notes">
+              This is a common misconception!
+            </aside>
           </section>
 
           <section data-transition="fade">
@@ -485,9 +493,10 @@
             <p class="fragment">Sanitization is fairly cheap and highly cacheable!</p>
 
             <aside class="notes">
-              Sanitize Output only
+              Sanitize Output only!
             </aside>
           </section>
+
 
           <section>
             <h1>Content-Security-Policy</h1>
@@ -755,9 +764,7 @@
           <section>
             <h3>Thanks</h3>
             <ul>
-              <li>Now that you know me a little, please feel free to call me "stash".</li>
-              <li>Talk is at <a href="https://github.com/stash">"stash/empirejs-2014" on github</a></li>
-              <li>I'm <a href="https://twitter.com/jstash">"@jstash" on twitter</a></li>
+              <li>Slides are at <a href="https://stash.github.io/empirejs-2014/">stash.github.io/empirejs-2014</a></li>
               <li>Thanks to my employer <a href="https://goinstant.com/">GoInstant</a> for sponsoring this talk.  We make Real-time, Backend-as-a-Service web APIs, and are very serious about Security.</li>
             </ul>
           </section>
